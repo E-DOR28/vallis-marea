@@ -1,7 +1,21 @@
+# Secretos
 .env
+.env.*
+!.env.example
+
+# Python
 __pycache__/
 *.pyc
+.venv/
+.req_installed
+
+# Sistema operativo
+.DS_Store
+
+# Datos locales y regenerables
 data/almacen/
 data/trazas/
 data/modelos/
-.req_installed
+data/logs/
+tmp/
+*.log

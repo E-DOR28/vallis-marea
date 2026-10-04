@@ -1,0 +1,820 @@
+{
+  "fecha": "2026-09-13 13:08",
+  "modo_degradado": false,
+  "advertencia": "Ejecutado con Gemini (gemini-2.5-flash / gemini-embedding-001).",
+  "configuracion": {
+    "modelo_generacion": "gemini-2.5-flash",
+    "modelo_embedding": "gemini-embedding-001",
+    "dim_embedding": 768,
+    "top_k_denso": 8,
+    "top_k_lexico": 8,
+    "top_k_final": 4,
+    "rrf_k": 60
+  },
+  "nivel_1_recuperacion": {
+    "n_items": 30,
+    "k": 4,
+    "recall_fuente@4": 1.0,
+    "recall_seccion@4": 0.9333,
+    "mrr": 0.8417,
+    "detalle": [
+      {
+        "id": "g01",
+        "pregunta": "Cuanto me devuelven si cancelo con 5 dias de anticipacion?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_cancelacion > Plazos de cancelacion y porcentaje de reembolso",
+          "politicas_cancelacion > Cancelacion parcial del grupo",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente",
+          "faq_general > Con cuanta anticipacion se debe reservar"
+        ]
+      },
+      {
+        "id": "g02",
+        "pregunta": "Si cancelo un dia antes del paseo pierdo todo?",
+        "acierto_fuente": true,
+        "acierto_seccion": false,
+        "rango_reciproco": 0.0,
+        "recuperado": [
+          "politicas_cancelacion > Reprogramacion sin costo",
+          "faq_general > Como se paga y como se confirma la reserva",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente",
+          "politicas_seguridad_abordaje > Documentos requeridos para abordar"
+        ]
+      },
+      {
+        "id": "g03",
+        "pregunta": "Puedo cambiar la fecha sin que me cobren?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_cancelacion > Reprogramacion sin costo",
+          "politicas_cancelacion > Plazos de cancelacion y porcentaje de reembolso",
+          "politicas_cancelacion > Cancelacion por condiciones climaticas o por autoridad maritima",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente"
+        ]
+      },
+      {
+        "id": "g04",
+        "pregunta": "Que pasa si la capitania cierra el puerto?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_cancelacion > Cancelacion por condiciones climaticas o por autoridad maritima",
+          "faq_general > Que pasa si llueve",
+          "politicas_seguridad_abordaje > Documentos requeridos para abordar",
+          "flota_y_tarifas > Como se asigna la embarcacion a una solicitud"
+        ]
+      },
+      {
+        "id": "g05",
+        "pregunta": "Si somos menos personas de las que dije me devuelven parte?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_cancelacion > Cancelacion parcial del grupo",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente",
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "flota_y_tarifas > Como se calcula el precio final"
+        ]
+      },
+      {
+        "id": "g06",
+        "pregunta": "Me enferme y tengo incapacidad, puedo cancelar?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_cancelacion > Casos de fuerza mayor del cliente",
+          "politicas_cancelacion > Cancelacion parcial del grupo",
+          "politicas_cancelacion > Reprogramacion sin costo",
+          "politicas_cancelacion > Cancelacion por condiciones climaticas o por autoridad maritima"
+        ]
+      },
+      {
+        "id": "g07",
+        "pregunta": "Sirve una foto de la cedula para abordar?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_seguridad_abordaje > Documentos requeridos para abordar",
+          "politicas_seguridad_abordaje > Restricciones de pasajeros",
+          "politicas_seguridad_abordaje > Hora de llegada al muelle",
+          "faq_general > Que llevar al paseo"
+        ]
+      },
+      {
+        "id": "g08",
+        "pregunta": "A que hora tengo que estar en el muelle?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_seguridad_abordaje > Hora de llegada al muelle",
+          "faq_general > Impuesto de muelle y entradas",
+          "politicas_cancelacion > Plazos de cancelacion y porcentaje de reembolso",
+          "faq_general > Que llevar al paseo"
+        ]
+      },
+      {
+        "id": "g09",
+        "pregunta": "Estoy embarazada de 7 meses, puedo ir?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_seguridad_abordaje > Restricciones de pasajeros",
+          "faq_general > Que llevar al paseo",
+          "faq_general > Se puede llevar mascotas",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente"
+        ]
+      },
+      {
+        "id": "g10",
+        "pregunta": "Los ninos tienen que usar chaleco todo el tiempo?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "politicas_seguridad_abordaje > Chalecos salvavidas y equipamiento",
+          "faq_general > Que llevar al paseo",
+          "rutas_turisticas > Cholon - medio dia de rumba",
+          "politicas_seguridad_abordaje > Restricciones de pasajeros"
+        ]
+      },
+      {
+        "id": "g11",
+        "pregunta": "Puedo llevar una botella de vidrio a bordo?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 0.5,
+        "recuperado": [
+          "faq_general > Se puede llevar comida y bebida propia",
+          "politicas_seguridad_abordaje > Normas a bordo",
+          "faq_general > Se puede llevar mascotas",
+          "faq_general > Que llevar al paseo"
+        ]
+      },
+      {
+        "id": "g12",
+        "pregunta": "El alquiler se cobra por persona?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "faq_general > Que incluye y que no incluye el alquiler",
+          "politicas_cancelacion > Cancelacion parcial del grupo",
+          "flota_y_tarifas > Como se calcula el precio final"
+        ]
+      },
+      {
+        "id": "g13",
+        "pregunta": "Que incluye el valor del alquiler?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Que incluye y que no incluye el alquiler",
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "faq_general > Como se paga y como se confirma la reserva",
+          "politicas_cancelacion > Cancelacion parcial del grupo"
+        ]
+      },
+      {
+        "id": "g14",
+        "pregunta": "Si llueve se cancela el paseo?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Que pasa si llueve",
+          "politicas_cancelacion > Reprogramacion sin costo",
+          "politicas_cancelacion > Cancelacion por condiciones climaticas o por autoridad maritima",
+          "politicas_cancelacion > Casos de fuerza mayor del cliente"
+        ]
+      },
+      {
+        "id": "g15",
+        "pregunta": "Me cobran descorche si llevo mi propio trago?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Se puede llevar comida y bebida propia",
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "faq_general > Que incluye y que no incluye el alquiler",
+          "flota_y_tarifas > Como se calcula el precio final"
+        ]
+      },
+      {
+        "id": "g16",
+        "pregunta": "Todas las lanchas tienen bano?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Hay bano a bordo",
+          "flota_y_tarifas > Como se compone la flota",
+          "faq_general > Se puede llevar mascotas",
+          "faq_general > Se puede llevar comida y bebida propia"
+        ]
+      },
+      {
+        "id": "g17",
+        "pregunta": "Cuanto hay que pagar para separar la fecha?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 0.25,
+        "recuperado": [
+          "politicas_cancelacion > Plazos de cancelacion y porcentaje de reembolso",
+          "politicas_cancelacion > Reprogramacion sin costo",
+          "faq_general > Hay descuento por temporada baja",
+          "faq_general > Como se paga y como se confirma la reserva"
+        ]
+      },
+      {
+        "id": "g18",
+        "pregunta": "Aceptan Nequi?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Como se paga y como se confirma la reserva",
+          "faq_general > Se puede llevar mascotas",
+          "faq_general > Que llevar al paseo",
+          "faq_general > Impuesto de muelle y entradas"
+        ]
+      },
+      {
+        "id": "g19",
+        "pregunta": "Puedo llevar a mi perro?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Se puede llevar mascotas",
+          "faq_general > Que llevar al paseo",
+          "faq_general > Se puede llevar comida y bebida propia",
+          "politicas_seguridad_abordaje > Normas a bordo"
+        ]
+      },
+      {
+        "id": "g20",
+        "pregunta": "Cuanto cuesta el impuesto de muelle?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Impuesto de muelle y entradas",
+          "faq_general > Que incluye y que no incluye el alquiler",
+          "flota_y_tarifas > Como se calcula el precio final",
+          "politicas_seguridad_abordaje > Hora de llegada al muelle"
+        ]
+      },
+      {
+        "id": "g21",
+        "pregunta": "Con cuanto tiempo debo reservar en temporada alta?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "faq_general > Con cuanta anticipacion se debe reservar",
+          "faq_general > Hay descuento por temporada baja",
+          "flota_y_tarifas > Como se calcula el precio final",
+          "politicas_cancelacion > Reprogramacion sin costo"
+        ]
+      },
+      {
+        "id": "g22",
+        "pregunta": "A que hora sale el paseo a Islas del Rosario?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "rutas_turisticas > Islas del Rosario - dia completo",
+          "politicas_seguridad_abordaje > Normas a bordo",
+          "politicas_seguridad_abordaje > Restricciones de pasajeros",
+          "faq_general > Que incluye y que no incluye el alquiler"
+        ]
+      },
+      {
+        "id": "g23",
+        "pregunta": "Cholon tiene playa?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "rutas_turisticas > Cholon - medio dia de rumba",
+          "flota_y_tarifas > Embarcaciones grandes y premium",
+          "faq_general > Hay bano a bordo",
+          "faq_general > Se puede llevar mascotas"
+        ]
+      },
+      {
+        "id": "g24",
+        "pregunta": "Cual ruta es mejor para ninos pequenos?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "rutas_turisticas > Baru y Playa Blanca - dia completo",
+          "flota_y_tarifas > Embarcaciones familiares, 10 a 12 pasajeros",
+          "rutas_turisticas > Cholon - medio dia de rumba",
+          "rutas_turisticas > Tierra Bomba y Bocachica - medio dia"
+        ]
+      },
+      {
+        "id": "g25",
+        "pregunta": "Cuantas personas maximo puedo llevar a pesca deportiva?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 0.5,
+        "recuperado": [
+          "flota_y_tarifas > Embarcacion de pesca deportiva",
+          "rutas_turisticas > Pesca deportiva - medio dia o dia completo",
+          "flota_y_tarifas > Como se compone la flota",
+          "flota_y_tarifas > Como se asigna la embarcacion a una solicitud"
+        ]
+      },
+      {
+        "id": "g26",
+        "pregunta": "Que plan sirve para una propuesta de matrimonio?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "rutas_turisticas > Atardecer en la bahia - dos horas",
+          "rutas_turisticas > Cholon - medio dia de rumba",
+          "flota_y_tarifas > Embarcaciones familiares, 10 a 12 pasajeros",
+          "rutas_turisticas > Islas del Rosario - dia completo"
+        ]
+      },
+      {
+        "id": "g27",
+        "pregunta": "Cual es la lancha mas economica?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 1.0,
+        "recuperado": [
+          "flota_y_tarifas > Embarcaciones economicas, hasta 9 pasajeros",
+          "flota_y_tarifas > Embarcaciones familiares, 10 a 12 pasajeros",
+          "flota_y_tarifas > Como se asigna la embarcacion a una solicitud",
+          "flota_y_tarifas > Embarcaciones grandes y premium"
+        ]
+      },
+      {
+        "id": "g28",
+        "pregunta": "Que lancha me sirve para 16 personas?",
+        "acierto_fuente": true,
+        "acierto_seccion": false,
+        "rango_reciproco": 0.0,
+        "recuperado": [
+          "flota_y_tarifas > Embarcaciones familiares, 10 a 12 pasajeros",
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "flota_y_tarifas > Como se compone la flota",
+          "flota_y_tarifas > Embarcaciones economicas, hasta 9 pasajeros"
+        ]
+      },
+      {
+        "id": "g29",
+        "pregunta": "De cuanto es el descuento en temporada baja?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 0.5,
+        "recuperado": [
+          "faq_general > Hay descuento por temporada baja",
+          "flota_y_tarifas > Como se calcula el precio final",
+          "faq_general > Con cuanta anticipacion se debe reservar",
+          "flota_y_tarifas > Embarcaciones economicas, hasta 9 pasajeros"
+        ]
+      },
+      {
+        "id": "g30",
+        "pregunta": "Pueden meter mas gente de la capacidad si pago extra?",
+        "acierto_fuente": true,
+        "acierto_seccion": true,
+        "rango_reciproco": 0.5,
+        "recuperado": [
+          "faq_general > Como se cobra: por persona o por embarcacion",
+          "flota_y_tarifas > Como se asigna la embarcacion a una solicitud",
+          "faq_general > Con cuanta anticipacion se debe reservar",
+          "politicas_cancelacion > Cancelacion parcial del grupo"
+        ]
+      }
+    ]
+  },
+  "nivel_2_generacion": {
+    "n_debe_responder": 30,
+    "n_debe_abstenerse": 5,
+    "tasa_respuesta": 0.9667,
+    "precision_citacion": 1.0,
+    "tasa_abstencion_correcta": 1.0,
+    "detalle": [
+      {
+        "id": "g01",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Si cancela con 5 días de anticipación, se le reembolsará el 100% del anticipo. Las cancelaciones se cuentan sobre la hora de zarpe programada."
+      },
+      {
+        "id": "g02",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No necesariamente. Si cancela con menos de 24 horas de aviso, puede recibir un reembolso del 100% si presenta soporte documental por enfermedad o accidente con incapacidad médica, "
+      },
+      {
+        "id": "g03",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Sí, puede reprogramar la fecha de su paseo una sola vez sin costo, siempre que avise con más de 48 horas de anticipación y que exista disponibilidad en la nueva fecha. Si la nueva "
+      },
+      {
+        "id": "g04",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion",
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Si la Capitanía de Puerto de Cartagena cierra el puerto, la salida se cancela por decisión de Vallis Marea. En ese caso, usted puede elegir entre reprogramar sin costo para la fech"
+      },
+      {
+        "id": "g05",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion",
+          "faq_general",
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Si el grupo se reduce después de confirmada la reserva, el valor del alquiler de la embarcación no cambia, ya que se cobra por embarcación y no por persona. Sin embargo, si se redu"
+      },
+      {
+        "id": "g06",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_cancelacion"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Sí, puede cancelar con un reembolso del 100% si presenta soporte documental de su enfermedad o accidente con incapacidad médica. Debe enviar el soporte por WhatsApp dentro de los 5"
+      },
+      {
+        "id": "g07",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No, no se acepta foto ni fotocopia de la cédula para abordar. Es necesario presentar el documento de identidad original en el muelle, por exigencia de la Capitanía de Puerto."
+      },
+      {
+        "id": "g08",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Los pasajeros deben presentarse en el Muelle de La Bodeguita 30 minutos antes de la hora de zarpe para el registro y la charla de seguridad."
+      },
+      {
+        "id": "g09",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No se permite el abordaje a mujeres embarazadas después de la semana 24 de gestación, debido al impacto del oleaje."
+      },
+      {
+        "id": "g10",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Sí, los menores de 12 años deben usar chaleco salvavidas de forma obligatoria durante la navegación y también durante las paradas de baño, sin excepción."
+      },
+      {
+        "id": "g11",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general",
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No se permiten recipientes de vidrio en cubierta por seguridad. Hay nevera con hielo a bordo en todas las embarcaciones."
+      },
+      {
+        "id": "g12",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El alquiler se cobra por embarcación, no por persona. Un grupo de 4 personas paga lo mismo que un grupo de 10 en la misma lancha, siempre que no se exceda la capacidad autorizada."
+      },
+      {
+        "id": "g13",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El valor del alquiler incluye la embarcación con capitán y marinero, el combustible de la ruta contratada, chalecos salvavidas, hielo y el seguro de pasajeros obligatorio."
+      },
+      {
+        "id": "g14",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "La lluvia por sí sola no cancela la salida. En el Caribe los aguaceros suelen ser cortos y el capitán ajusta la ruta. La salida solo se cancela si la Capitanía de Puerto cierra el "
+      },
+      {
+        "id": "g15",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No, no se cobra descorche si lleva su propia comida y bebida. La única restricción es que no se permiten recipientes de vidrio en cubierta por seguridad. Todas las embarcaciones ti"
+      },
+      {
+        "id": "g16",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general",
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No, no todas las lanchas tienen baño. Solo las embarcaciones de más de 32 pies cuentan con este servicio a bordo. Las lanchas más pequeñas no lo tienen, pero todas las rutas incluy"
+      },
+      {
+        "id": "g17",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Para confirmar la reserva y separar la fecha, se debe pagar un anticipo del 50% del valor total del alquiler."
+      },
+      {
+        "id": "g18",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Sí, aceptamos Nequi para el pago del anticipo de la reserva y también para el saldo el día del paseo."
+      },
+      {
+        "id": "g19",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general",
+          "politicas_seguridad_abordaje"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Sí, puede llevar a su perro si es una mascota pequeña, siempre que tenga autorización previa y vaya en guacal. Es importante que nos avise al momento de reservar, ya que no todas l"
+      },
+      {
+        "id": "g20",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El impuesto de muelle lo cobra la administración del muelle a cada pasajero al momento del embarque y ronda los 20.000 pesos por persona. Vallis Marea no recauda este valor."
+      },
+      {
+        "id": "g21",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general"
+        ],
+        "confianza": 1.0,
+        "respuesta": "En temporada alta, se recomienda reservar con al menos 3 semanas de anticipación, especialmente si la embarcación es para más de 10 pasajeros, ya que son las primeras en agotarse."
+      },
+      {
+        "id": "g22",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "rutas_turisticas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El zarpe para el paseo a las Islas del Rosario es a las 08:00."
+      },
+      {
+        "id": "g23",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "rutas_turisticas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Cholon es una ensenada natural donde las embarcaciones fondean juntas. No hay playa, por lo que todo el tiempo se pasa a bordo o en el agua junto a la embarcacion."
+      },
+      {
+        "id": "g24",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "rutas_turisticas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "La ruta de día completo a Barú y Playa Blanca es la más recomendada para familias con niños pequeños. Ofrece la mejor relación entre tiempo de playa y tiempo de navegación."
+      },
+      {
+        "id": "g25",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "flota_y_tarifas",
+          "rutas_turisticas",
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "Para la pesca deportiva, el cupo máximo es de 6 pasajeros por embarcación, sin importar la capacidad nominal de la lancha. La única embarcación habilitada para esta actividad es La"
+      },
+      {
+        "id": "g26",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "rutas_turisticas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El plan \"Atardecer en la bahia - dos horas\" es la opcion mas solicitada para propuestas de matrimonio. Este recorrido corto por la bahia de Cartagena ofrece vistas del Centro Histo"
+      },
+      {
+        "id": "g27",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "La lancha más económica de nuestra flota es La Brisa de Baru (VM-01). Su tarifa es de 1.250.000 pesos por día completo y 850.000 por medio día en temporada alta."
+      },
+      {
+        "id": "g28",
+        "abstuvo": true,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": ""
+      },
+      {
+        "id": "g29",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "faq_general",
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "El descuento en temporada baja es del 18% sobre la tarifa de temporada alta. Típicamente, el descuento oscila entre el 15% y el 20% y se aplica automáticamente en la cotización."
+      },
+      {
+        "id": "g30",
+        "abstuvo": false,
+        "cito_fuente_correcta": true,
+        "citas": [
+          "flota_y_tarifas"
+        ],
+        "confianza": 1.0,
+        "respuesta": "No, nunca se excede la capacidad autorizada de una embarcación. Hacerlo es una falta ante la Capitanía de Puerto y anula el seguro de pasajeros."
+      }
+    ],
+    "detalle_abstencion": [
+      {
+        "id": "g31",
+        "pregunta": "Cual es el clima promedio de Cartagena en noviembre?",
+        "abstuvo": true,
+        "motivo": "Los fragmentos proporcionados no contienen información sobre el clima promedio de Cartagena en noviembre.",
+        "respuesta_si_no_abstuvo": ""
+      },
+      {
+        "id": "g32",
+        "pregunta": "Me recomiendan un hotel en Bocagrande?",
+        "abstuvo": true,
+        "motivo": "Los fragmentos proporcionados no contienen información sobre recomendaciones de hoteles en Bocagrande.",
+        "respuesta_si_no_abstuvo": ""
+      },
+      {
+        "id": "g33",
+        "pregunta": "Cuanto cuesta alquilar un helicoptero?",
+        "abstuvo": true,
+        "motivo": "Los fragmentos proporcionados no contienen información sobre el alquiler de helicópteros.",
+        "respuesta_si_no_abstuvo": ""
+      },
+      {
+        "id": "g34",
+        "pregunta": "Puedo pagar en bitcoin?",
+        "abstuvo": true,
+        "motivo": "Los fragmentos proporcionados no contienen información sobre si se acepta Bitcoin como método de pago.",
+        "respuesta_si_no_abstuvo": ""
+      },
+      {
+        "id": "g35",
+        "pregunta": "Tienen sede en Santa Marta?",
+        "abstuvo": true,
+        "motivo": "Los fragmentos proporcionados no contienen información sobre si Vallis Marea tiene sede en Santa Marta.",
+        "respuesta_si_no_abstuvo": ""
+      }
+    ]
+  },
+  "nivel_3_arquitecturas": {
+    "n_consultas": 20,
+    "monolito_llamada_directa_ms": {
+      "p50": 6.6,
+      "p95": 11.0,
+      "media": 7.6,
+      "min": 5.3,
+      "max": 16.3
+    },
+    "ecosistema_a2a_ms": {
+      "p50": 14.3,
+      "p95": 21.9,
+      "media": 15.2,
+      "min": 11.0,
+      "max": 24.6
+    },
+    "descubrimiento_agent_card_ms": {
+      "conocimiento": 434.4,
+      "disponibilidad": 365.2,
+      "recomendador": 366.4
+    },
+    "nota_descubrimiento": "Costo de arranque: leer el Agent Card y abrir la conexion, una vez por agente y por sesion. No se paga en cada mensaje.",
+    "sobrecosto_p50_ms": 7.7,
+    "sobrecosto_p50_pct": 116.7,
+    "lectura": "El sobrecosto es el precio de serializar, cruzar HTTP/JSON-RPC y deserializar en cada delegacion. A cambio se obtiene desacoplamiento, reutilizacion por clientes externos y trazabilidad por salto."
+  },
+  "router": {
+    "exactitud": 0.8696,
+    "f1_macro": 0.8471,
+    "embeddings_degradados": false,
+    "dataset": {
+      "total": 183,
+      "conteo_por_clase": {
+        "disponibilidad": 18,
+        "faq": 18,
+        "otro": 42,
+        "politica": 18,
+        "precio": 18,
+        "recomendacion": 15,
+        "reserva": 17,
+        "ruta_turistica": 16,
+        "saludo": 21
+      },
+      "fuente_publica": {
+        "dataset": "mteb/amazon_massive_intent",
+        "config": "es",
+        "split": "train",
+        "cita": "FitzGerald et al. (2022). MASSIVE: A 1M-Example Multilingual Natural Language Understanding Dataset. Accedido via mteb/amazon_massive_intent (es)."
+      }
+    },
+    "nota_metodologica": "Regresion logistica sobre embeddings congelados. No es fine-tuning de un LLM: los pesos del modelo de embeddings no se modifican."
+  }
+}
