@@ -1,5 +1,6 @@
 # Vallis Marea — Ecosistema de agentes MCP/A2A (demo reproducible)
-# Python 3.11+ | venv: C:\envs\vallis_marea
+# Python 3.13 (verificado en R0) | entorno: python3.13 -m venv .venv
+# Versiones exactas probadas: requirements.lock
 
 # --- LLM y embeddings ---
 google-genai>=2.20.0

@@ -1,0 +1,211 @@
+{
+  "exactitud": 0.8696,
+  "f1_macro": 0.8471,
+  "n_entrenamiento": 137,
+  "n_prueba": 46,
+  "clases": [
+    "disponibilidad",
+    "faq",
+    "otro",
+    "politica",
+    "precio",
+    "recomendacion",
+    "reserva",
+    "ruta_turistica",
+    "saludo"
+  ],
+  "dimension_embedding": 768,
+  "modelo_embedding": "gemini-embedding-001",
+  "embeddings_degradados": false,
+  "por_clase": {
+    "disponibilidad": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 5.0
+    },
+    "faq": {
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1-score": 0.5,
+      "support": 4.0
+    },
+    "otro": {
+      "precision": 0.9091,
+      "recall": 0.9091,
+      "f1-score": 0.9091,
+      "support": 11.0
+    },
+    "politica": {
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1-score": 0.6667,
+      "support": 4.0
+    },
+    "precio": {
+      "precision": 0.8333,
+      "recall": 1.0,
+      "f1-score": 0.9091,
+      "support": 5.0
+    },
+    "recomendacion": {
+      "precision": 0.8,
+      "recall": 1.0,
+      "f1-score": 0.8889,
+      "support": 4.0
+    },
+    "reserva": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 4.0
+    },
+    "ruta_turistica": {
+      "precision": 0.75,
+      "recall": 0.75,
+      "f1-score": 0.75,
+      "support": 4.0
+    },
+    "saludo": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 5.0
+    }
+  },
+  "matriz_confusion": {
+    "etiquetas": [
+      "disponibilidad",
+      "faq",
+      "otro",
+      "politica",
+      "precio",
+      "recomendacion",
+      "reserva",
+      "ruta_turistica",
+      "saludo"
+    ],
+    "matriz": [
+      [
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        10,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        5
+      ]
+    ]
+  },
+  "dataset": {
+    "total": 183,
+    "conteo_por_clase": {
+      "disponibilidad": 18,
+      "faq": 18,
+      "otro": 42,
+      "politica": 18,
+      "precio": 18,
+      "recomendacion": 15,
+      "reserva": 17,
+      "ruta_turistica": 16,
+      "saludo": 21
+    },
+    "fuente_publica": {
+      "dataset": "mteb/amazon_massive_intent",
+      "config": "es",
+      "split": "train",
+      "cita": "FitzGerald et al. (2022). MASSIVE: A 1M-Example Multilingual Natural Language Understanding Dataset. Accedido via mteb/amazon_massive_intent (es)."
+    }
+  },
+  "nota_metodologica": "Regresion logistica sobre embeddings congelados. No es fine-tuning de un LLM: los pesos del modelo de embeddings no se modifican."
+}

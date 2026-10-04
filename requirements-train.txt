@@ -1,0 +1,9 @@
+# Dependencias de entrenamiento (R2). No van en la imagen de inferencia.
+# Instalar sobre el entorno base: .venv/bin/python -m pip install -r requirements-train.txt
+# Las versiones exactas se fijan en requirements-train.lock al empezar R2.
+torch
+transformers
+safetensors
+huggingface_hub
+datasets
+accelerate
