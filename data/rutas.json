@@ -1,0 +1,77 @@
+{
+  "_comentario": "Catalogo estructurado de rutas. El texto descriptivo largo vive en data/corpus/rutas_turisticas.md y lo indexa el Agente de Conocimiento; aqui solo van los datos operativos que consulta el Agente de Disponibilidad.",
+  "descuento_temporada_baja": 0.18,
+  "temporada_alta": [
+    {"desde": "2026-12-15", "hasta": "2027-01-15", "motivo": "fin de ano"},
+    {"desde": "2027-03-21", "hasta": "2027-03-28", "motivo": "semana santa"}
+  ],
+  "rutas": [
+    {
+      "codigo": "rosario",
+      "nombre": "Islas del Rosario - dia completo",
+      "duracion": "dia_completo",
+      "hora_zarpe": "08:00",
+      "hora_regreso": "16:30",
+      "tags": ["snorkel", "playa", "naturaleza", "clasico", "familiar"],
+      "capacidad_minima_sugerida": 4,
+      "tipo_embarcacion_requerido": null,
+      "resumen": "Plan clasico de Cartagena: travesia de 60 minutos, dos paradas de bano en arrecife y club de playa en Isla Grande."
+    },
+    {
+      "codigo": "baru",
+      "nombre": "Baru y Playa Blanca - dia completo",
+      "duracion": "dia_completo",
+      "hora_zarpe": "08:30",
+      "hora_regreso": "16:00",
+      "tags": ["playa", "familiar", "ninos", "tranquilo"],
+      "capacidad_minima_sugerida": 2,
+      "tipo_embarcacion_requerido": null,
+      "resumen": "Cuatro horas de tiempo libre en Playa Blanca, arena clara y agua poco profunda. La mejor para familias con ninos."
+    },
+    {
+      "codigo": "cholon",
+      "nombre": "Cholon - medio dia de rumba",
+      "duracion": "medio_dia",
+      "hora_zarpe": "10:00",
+      "hora_regreso": "15:00",
+      "tags": ["rumba", "fiesta", "adultos", "musica", "despedida"],
+      "capacidad_minima_sugerida": 6,
+      "tipo_embarcacion_requerido": null,
+      "resumen": "Ensenada donde las embarcaciones fondean juntas: musica, bebida y bano desde la lancha. Sin playa."
+    },
+    {
+      "codigo": "tierrabomba",
+      "nombre": "Tierra Bomba y Bocachica - medio dia",
+      "duracion": "medio_dia",
+      "hora_zarpe": "09:00",
+      "hora_regreso": "13:00",
+      "tags": ["economico", "corto", "historia", "crucero", "playa"],
+      "capacidad_minima_sugerida": 2,
+      "tipo_embarcacion_requerido": null,
+      "resumen": "Alternativa corta y economica a 20 minutos: playa en Tierra Bomba y opcionalmente el Fuerte de San Fernando."
+    },
+    {
+      "codigo": "atardecer",
+      "nombre": "Atardecer en la bahia - dos horas",
+      "duracion": "medio_dia",
+      "hora_zarpe": "17:00",
+      "hora_regreso": "19:00",
+      "tags": ["romantico", "atardecer", "propuesta", "aniversario", "fotografia", "corto"],
+      "capacidad_minima_sugerida": 2,
+      "tipo_embarcacion_requerido": null,
+      "resumen": "Recorrido por la bahia con vista al Centro Historico al atardecer. La opcion para propuestas y aniversarios."
+    },
+    {
+      "codigo": "pesca",
+      "nombre": "Pesca deportiva",
+      "duracion": "dia_completo",
+      "hora_zarpe": "06:00",
+      "hora_regreso": "15:00",
+      "tags": ["pesca", "deportiva", "especializado"],
+      "capacidad_minima_sugerida": 2,
+      "capacidad_maxima_forzada": 6,
+      "tipo_embarcacion_requerido": "lancha de pesca",
+      "resumen": "Salida a zonas de pesca fuera de la bahia con equipo y tripulacion especializada. Maximo 6 pasajeros."
+    }
+  ]
+}

@@ -1,0 +1,992 @@
+{
+  "ejemplos": [
+    {
+      "texto": "apaga el enchufe de la olla arrocera",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_wemo_off"
+    },
+    {
+      "texto": "cuanto me devuelven si cancelo",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "siri buenas noches luces apagadas",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightoff"
+    },
+    {
+      "texto": "dale, reservemos",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero escuchar mi canción favorita de iron maiden",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "play_music"
+    },
+    {
+      "texto": "hay disponibilidad para el 15 de octubre",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "animame",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "general_joke"
+    },
+    {
+      "texto": "con cuanta anticipacion debo reservar",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuentame del plan a cholon",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que me recomiendan para ir con ninos",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero reprogramar el paseo",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "por favor pon música clásica para la cena ahora",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "play_music"
+    },
+    {
+      "texto": "que hay para hacer en islas del rosario",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero bloquear esa fecha",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "somos 8 amigos y queremos rumba, que nos sugieren",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "como te va",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "general_greet"
+    },
+    {
+      "texto": "que pasa si cierran el puerto",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuales son los destinos disponibles",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "qué es una broma tonta sabes",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "general_joke"
+    },
+    {
+      "texto": "el precio es por persona o por lancha",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "tienen cupo para 12 personas el domingo",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto seria el total por 8 personas",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cual plan es el mas popular",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "donde queda el punto de encuentro",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cual lancha me sirve para un aniversario",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto dura la travesia a rosario",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "el paseo incluye snorkel",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "saludos",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que tal",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay seguro para los pasajeros",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero cancelar mi reserva",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay que pagar entrada al parque",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo cambiar la fecha sin costo",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero apartar el paseo a baru",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "y la luz comenzó",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lighton"
+    },
+    {
+      "texto": "como se paga",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "a que hora debo llegar al muelle",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "el paseo a cholon tiene playa",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo llevar cerveza",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay disponibilidad en semana santa",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "se puede fumar en la lancha",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "tienen lancha disponible el sabado",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "dime el nombre de esta canción",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "music_query"
+    },
+    {
+      "texto": "cancelar mi alarma de las ocho de la mañana",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "alarm_remove"
+    },
+    {
+      "texto": "que tal el plan de pesca deportiva",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "opciones de entrega de comida china más valoradas",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "takeaway_query"
+    },
+    {
+      "texto": "los ninos necesitan documento",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay lancha para el 10 de octubre a baru",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto es el anticipo",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "necesito cambiar la fecha de mi reserva",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que esta pasando afuera",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "cual es la politica de cancelacion",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que debo llevar al paseo",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "buenas",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "como es el atardecer en la bahia",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola buenas noches",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero reservar para el sabado",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "está lloviendo afuera olly",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "como hago para reservar",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que precio tiene la lancha de 12 personas",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "necesito reservar para 14 personas",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "buenas tardes",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que opcion tienen para un cumpleanos",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "aceptan tarjeta",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto vale alquilar una lancha por el dia",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "ajusta el brillo a cincuenta por ciento",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightchange"
+    },
+    {
+      "texto": "pon por qué cantas por kirk franklin",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "play_music"
+    },
+    {
+      "texto": "hasta luego",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuantas horas dura el paseo",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "por sensor remoto",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightoff"
+    },
+    {
+      "texto": "me enseñas las alarmas que yo tengo puestas",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "alarm_query"
+    },
+    {
+      "texto": "poner una alarma dentro de cuarenta minutos",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "alarm_set"
+    },
+    {
+      "texto": "si llueve me devuelven la plata",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "queda algo libre para manana",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola, buen dia",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay cupo el fin de semana",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "para el 24 de diciembre tienen algo",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "está lloviendo",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "buen dia, tienen atencion ahora?",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "tienen algo para 8 personas ese dia",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "baja las luces de la cocina",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightdim"
+    },
+    {
+      "texto": "hey",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "incluye almuerzo",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "tienen disponible algo para maniana en la tarde",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay reembolso si cancelo un dia antes",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "me gusta el jazz",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "music_likeness"
+    },
+    {
+      "texto": "me pasas la tarifa de cholon",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que vale la mas economica",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo llevar mi propia comida",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto me cobran por ir a playa blanca",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "confirmo la reserva",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "qué está pasando en el fútbol hoy",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "news_query"
+    },
+    {
+      "texto": "de donde sale la lancha",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "buenos dias",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "estado del pedido del domino's pizza",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "takeaway_query"
+    },
+    {
+      "texto": "que incluye el alquiler",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "buenas, una pregunta",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cual es el precio para 10 personas",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto cobran por el atardecer",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "está nevando ahora mismo",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "el precio incluye almuerzo",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto me sale medio dia",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "va a llover hoy",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "separame el cupo por favor",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "tienen descuento en temporada baja",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo cancelar por enfermedad",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "como es el paseo a playa blanca",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que paseos ofrecen",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero sorprender a mi esposa, ideas",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo llevar mascotas",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "chao, gracias",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "si, confirmo la manglar para el 10",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto cuesta con todo incluido",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola! como estan",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay bano en la lancha",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "me sirve el sabado, hay algo",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "listo, separame esa lancha",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "ok gracias",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "pon mi playlist de jazz",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "play_music"
+    },
+    {
+      "texto": "tienen lancha libre pasado manana",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cambia las luces de mi cuarto a azul",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightchange"
+    },
+    {
+      "texto": "me cotizas un dia completo a baru",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "es obligatorio el chaleco salvavidas",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo ir embarazada",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuantas veces puedo reprogramar",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto se demora llegar a las islas",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto cuesta el paseo a islas del rosario",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que me sugieren para primera vez en cartagena",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que pasa si no puedo ir",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuanto vale el yate grande",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "necesito algo con bano para adultos mayores",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "aceptan nequi o daviplata",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hagamosle, reservo el domingo",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "perfecto, gracias por la info",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que documentos necesito para abordar",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "solo ponga las luces a veinte por ciento",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightchange"
+    },
+    {
+      "texto": "cuanto es el impuesto de muelle",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay disponibilidad para islas del rosario el jueves",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hay nevera a bordo",
+      "intencion": "faq",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que disponibilidad tienen para 16 personas",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que incluye la ruta a tierra bomba",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "olly silencio",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "audio_volume_mute"
+    },
+    {
+      "texto": "olly para por un minuto",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "audio_volume_mute"
+    },
+    {
+      "texto": "ya hice la transferencia, confirmo",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que me conviene para un dia con mi pareja",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "por favor pon la luz adecuada para leer",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightchange"
+    },
+    {
+      "texto": "mira la aplicación del tiempo para ver si",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "que rutas hacen",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "para un grupo corporativo que recomiendan",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "vamos en familia, que sugieren",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "léeme nuevos titulares",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "news_query"
+    },
+    {
+      "texto": "death metal ahora",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "play_music"
+    },
+    {
+      "texto": "me das un estimado de precio",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero algo economico y tranquilo, que me ofrecen",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cambia las luces de mi habitación a un color algo más romántico",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightchange"
+    },
+    {
+      "texto": "quién es el autor de esta música",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "music_query"
+    },
+    {
+      "texto": "que se ve en el recorrido por la bahia",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "listo, muchas gracias",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola equipo",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "si es mediodia en madrid que hora es en california",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "datetime_convert"
+    },
+    {
+      "texto": "a que hora sale el paseo a baru",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que plan me recomiendan para una despedida de soltero",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "esta libre alguna lancha el 3 de octubre",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola, me pueden ayudar?",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "puedo dejar el anticipo hoy",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cual es el valor del paseo de pesca",
+      "intencion": "precio",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "quiero hacer la reserva ya",
+      "intencion": "reserva",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "hola, quien me atiende",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cuáles son las predicciones meteorológicas para mañana",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "que lanchas tienen libres el proximo viernes",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "que playa recomiendan",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "pon las luces a maximo",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightup"
+    },
+    {
+      "texto": "que lancha es la mejor para fotos",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "cual es la mejor opcion para 14 personas",
+      "intencion": "recomendacion",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "apaga las luces del dormitorio",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_hue_lightoff"
+    },
+    {
+      "texto": "que pasa si llego tarde al muelle",
+      "intencion": "politica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "gracias, muy amables",
+      "intencion": "saludo",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "dime el tiempo en barcelona",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "weather_query"
+    },
+    {
+      "texto": "quedan lanchas para el puente",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "enciende mi enchufe",
+      "intencion": "otro",
+      "origen": "massive_es",
+      "intencion_original": "iot_wemo_on"
+    },
+    {
+      "texto": "el fuerte de san fernando se puede visitar",
+      "intencion": "ruta_turistica",
+      "origen": "dominio_sintetico"
+    },
+    {
+      "texto": "esta ocupada la lancha grande el sabado",
+      "intencion": "disponibilidad",
+      "origen": "dominio_sintetico"
+    }
+  ],
+  "clases": [
+    "disponibilidad",
+    "faq",
+    "otro",
+    "politica",
+    "precio",
+    "recomendacion",
+    "reserva",
+    "ruta_turistica",
+    "saludo"
+  ],
+  "conteo_por_clase": {
+    "disponibilidad": 18,
+    "faq": 18,
+    "otro": 42,
+    "politica": 18,
+    "precio": 18,
+    "recomendacion": 15,
+    "reserva": 17,
+    "ruta_turistica": 16,
+    "saludo": 21
+  },
+  "fuente_publica": {
+    "dataset": "mteb/amazon_massive_intent",
+    "config": "es",
+    "split": "train",
+    "cita": "FitzGerald et al. (2022). MASSIVE: A 1M-Example Multilingual Natural Language Understanding Dataset. Accedido via mteb/amazon_massive_intent (es)."
+  },
+  "fuera_de_dominio_ok": true,
+  "fuera_de_dominio_error": null,
+  "descartadas_por_ambiguedad": 40
+}

@@ -1,0 +1,31 @@
+# Vallis Marea — Ecosistema de agentes MCP/A2A (demo reproducible)
+# Python 3.11+ | venv: C:\envs\vallis_marea
+
+# --- LLM y embeddings ---
+google-genai>=2.20.0
+
+# --- Protocolos de interoperabilidad ---
+mcp>=2.0.0
+a2a-sdk>=1.1.0
+
+# --- Orquestacion de agentes ---
+langgraph>=1.0.0
+langchain-core>=1.0.0
+
+# --- Servicios A2A (HTTP) ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+httpx>=0.27.0
+
+# --- Almacenamiento ---
+chromadb>=0.5.0
+
+# --- Interfaz ---
+streamlit>=1.40.0
+
+# --- Utilidades ---
+pydantic>=2.9.0
+python-dotenv>=1.0.0
+numpy>=1.26.0
+pandas>=2.2.0
+scikit-learn>=1.5.0

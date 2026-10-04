@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+data/almacen/
+data/trazas/
+data/modelos/
+.req_installed
