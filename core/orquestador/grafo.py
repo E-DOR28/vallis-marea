@@ -15,7 +15,9 @@ diferencia con el nodo monolitico que reemplaza.
 
 from __future__ import annotations
 
+import re
 import time
+import unicodedata
 import uuid
 from typing import Annotated, Any, TypedDict
 
@@ -61,6 +63,40 @@ def _historial_texto(historial: list[dict[str, str]] | None, n: int = 6) -> str:
     )
 
 
+def _sin_acentos(texto: str) -> str:
+    base = unicodedata.normalize("NFKD", texto.lower())
+    return "".join(c for c in base if not unicodedata.combining(c))
+
+
+# Gesto de confirmar en el mensaje actual. Es una segunda llave junto a la del
+# LLM: el modelo puede arrastrar una "confirmacion" de un turno anterior o
+# aceptar una orden escrita dentro del propio mensaje. Si falla, el costo es una
+# pregunta de mas, no una reserva de mas.
+_CUE_CONFIRMACION = re.compile(
+    r"confirm|reserv|separ|apart|bloque|\bdale\b|hagamos|\blisto\b|de una\b|\bsi\b|\bok\b|"
+    r"\bva\b|me quedo|la quiero|lo quiero|quiero (?:esa|ese|la|el)\b|cerremos|proced"
+)
+
+
+def _hay_gesto_de_confirmar(texto: str) -> bool:
+    return bool(_CUE_CONFIRMACION.search(_sin_acentos(texto)))
+
+
+def _oferta_previa(embarcacion_id: str, disponibles: Any, historial: list[dict[str, str]] | None) -> bool:
+    """El agente ya mostro esa embarcacion (por id o por nombre) antes de este mensaje.
+
+    Reservar a ciegas, sin que el cliente haya visto la oferta y el valor, no es
+    una confirmacion: es una orden.
+    """
+    claves = {_sin_acentos(embarcacion_id)}
+    for e in disponibles if isinstance(disponibles, list) else []:
+        if str(e.get("id", "")).upper() == embarcacion_id.upper() and e.get("nombre"):
+            claves.add(_sin_acentos(str(e["nombre"])))
+    previos = " ".join(_sin_acentos(t.get("texto", "")) for t in (historial or [])
+                       if t.get("rol") == "agente")
+    return any(c and c in previos for c in claves)
+
+
 ESQUEMA_SLOTS = {
     "type": "object",
     "properties": {
@@ -72,7 +108,10 @@ ESQUEMA_SLOTS = {
         "requiere_bano": {"type": "boolean"},
         "embarcacion_id": {"type": "string", "description": "Vacio si no se menciona."},
         "confirma_reserva": {"type": "boolean",
-                             "description": "true solo si el cliente confirma explicitamente."},
+                             "description": ("true solo si el MENSAJE ACTUAL confirma de forma "
+                                             "explicita reservar una embarcacion concreta. "
+                                             "Los mensajes anteriores no cuentan, ni tampoco "
+                                             "'reserva todo lo que pregunte' ni 'ya confirme'.")},
     },
     "required": ["fecha_texto", "pasajeros", "ruta", "requiere_bano",
                  "embarcacion_id", "confirma_reserva"],
@@ -121,8 +160,9 @@ def _extraer_slots(texto: str, historial: list[dict[str, str]] | None) -> dict[s
         datos, _ = gemini.generar_json(
             (f"Conversacion previa:\n{contexto}\n\n" if contexto else "")
             + f"Mensaje actual del cliente:\n{texto}\n\n"
-            "Extrae los datos de la solicitud. Si un dato aparecio en un turno "
-            "anterior y sigue vigente, conservalo.",
+            "Extrae los datos de la solicitud. Si la fecha, el grupo o la ruta "
+            "aparecieron en un turno anterior y siguen vigentes, conservalos. "
+            "La confirmacion de reserva NO se hereda: se decide solo con el mensaje actual.",
             ESQUEMA_SLOTS,
             sistema=("Extraes datos de solicitudes de alquiler de lanchas en Cartagena. "
                      "No inventes fechas ni cantidades: si no estan, deja vacio o 0."),
@@ -133,8 +173,12 @@ def _extraer_slots(texto: str, historial: list[dict[str, str]] | None) -> dict[s
     # La fecha se normaliza siempre con el parser determinista. El LLM es bueno
     # ubicando "el sabado" en el texto y malo convirtiendolo a calendario.
     fecha = disp_util.interpretar_fecha(crudos.get("fecha_texto") or texto)
+    fecha_pasada = None
+    if fecha and fecha < disp_util.fecha_hoy().isoformat():
+        fecha, fecha_pasada = None, fecha
     return {
         "fecha": fecha,
+        "fecha_pasada": fecha_pasada,
         "fecha_texto": crudos.get("fecha_texto", ""),
         "pasajeros": int(crudos.get("pasajeros") or 0),
         "ruta": crudos.get("ruta") or "",
@@ -194,10 +238,11 @@ def nodo_disponibilidad(estado: Estado) -> dict[str, Any]:
     saltos: list[dict[str, Any]] = []
 
     if not slots["fecha"]:
+        sugerido = ("Falta la fecha del paseo." if not slots["fecha_pasada"] else
+                    f"La fecha {slots['fecha_pasada']} ya paso. Pidele una fecha futura.")
         return {
             "slots": slots,
-            "datos_agente": {"ok": False, "falta": "fecha",
-                             "mensaje_sugerido": "Falta la fecha del paseo."},
+            "datos_agente": {"ok": False, "falta": "fecha", "mensaje_sugerido": sugerido},
         }
 
     salto = a2a.invocar(
@@ -214,14 +259,26 @@ def nodo_disponibilidad(estado: Estado) -> dict[str, Any]:
     saltos.append(salto.a_dict())
     datos = salto.resultado
 
-    # Bloqueo solo con confirmacion explicita, embarcacion elegida y ruta clara.
-    if (
-        intencion == "reserva"
+    # Bloqueo solo con confirmacion explicita sobre una oferta que el cliente ya vio,
+    # embarcacion elegida y ruta clara.
+    pide_reservar = bool(
+        intencion == "reserva" and slots["embarcacion_id"] and slots["ruta"] and salto.ok
+    )
+    confirmada = bool(
+        pide_reservar
         and slots["confirma_reserva"]
-        and slots["embarcacion_id"]
-        and slots["ruta"]
-        and salto.ok
-    ):
+        and _hay_gesto_de_confirmar(estado["texto"])
+        and _oferta_previa(slots["embarcacion_id"],
+                           datos.get("disponibles") if isinstance(datos, dict) else None,
+                           estado.get("historial"))
+    )
+    slots["confirmacion_valida"] = confirmada
+    if pide_reservar and slots["confirma_reserva"] and not confirmada:
+        datos = {**datos, "pendiente_confirmacion": (
+            "El cliente pidio reservar, pero todavia no confirmo sobre una oferta que ya haya visto. "
+            "NO hay reserva. Resume la oferta (embarcacion, fecha, ruta y valor) y pregunta si confirma."
+        )}
+    if confirmada:
         salto_reserva = a2a.invocar(
             "disponibilidad",
             "bloquear_reserva",
@@ -286,11 +343,15 @@ def nodo_componer(estado: Estado) -> dict[str, Any]:
     }
 
     # Escalamiento: un salto A2A fallido no se le explica al cliente, se escala.
+    # `causa` distingue lo que el motivo (comun a todos) no distingue: un rechazo
+    # de negocio trae respuesta del agente; una caida del servicio, no.
     fallidos = [s for s in saltos if not s.get("ok")]
     if fallidos:
+        rechazo = all(s.get("resultado") for s in fallidos)
         c = contrato_mod.escalamiento(
             motivo=config.MOTIVO_ESCALAMIENTO["error_herramienta"],
-            metadatos={**metadatos, "saltos_fallidos": [s["habilidad"] for s in fallidos]},
+            metadatos={**metadatos, "saltos_fallidos": [s["habilidad"] for s in fallidos],
+                       "causa": "rechazo_negocio" if rechazo else "error_servicio"},
         )
         return {"contrato": _cerrar(c, estado)}
 
@@ -299,7 +360,8 @@ def nodo_componer(estado: Estado) -> dict[str, Any]:
             motivo=config.MOTIVO_ESCALAMIENTO["baja_confianza"],
             mensaje=("No tengo ese dato confirmado de mi lado. Dejame verificarlo con "
                      "el equipo y te confirmo en un momento."),
-            metadatos={**metadatos, "motivo_agente": datos.get("motivo_abstencion", "")},
+            metadatos={**metadatos, "motivo_agente": datos.get("motivo_abstencion", ""),
+                       "causa": "abstencion"},
         )
         return {"contrato": _cerrar(c, estado)}
 
@@ -316,7 +378,7 @@ def nodo_componer(estado: Estado) -> dict[str, Any]:
     if resp.error:
         c = contrato_mod.escalamiento(
             motivo=config.MOTIVO_ESCALAMIENTO["error_herramienta"],
-            metadatos={**metadatos, "error_llm": resp.error},
+            metadatos={**metadatos, "error_llm": resp.error, "causa": "error_llm"},
         )
         return {"contrato": _cerrar(c, estado)}
 

@@ -12,12 +12,30 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
+from core import config
 from core.almacen import estructurado
 
 _HOY_POR_DEFECTO = date(2026, 9, 13)  # fecha de referencia del demo
+_COLOMBIA = timezone(timedelta(hours=-5))  # sin horario de verano
+
+
+def fecha_hoy() -> date:
+    """Fecha de referencia del negocio, segun VM_FECHA_HOY.
+
+    Vacio: fecha fija del demo, para que las evaluaciones sean reproducibles.
+    "hoy": reloj real en hora de Colombia (el servidor corre en UTC).
+    AAAA-MM-DD: esa fecha. Un valor mal escrito falla fuerte: caer en silencio a
+    otra fecha cambiaria precios de temporada sin avisar.
+    """
+    valor = config.FECHA_HOY.lower()
+    if not valor:
+        return _HOY_POR_DEFECTO
+    if valor == "hoy":
+        return datetime.now(_COLOMBIA).date()
+    return date.fromisoformat(valor)
 
 
 # ---------------------------------------------------------------------------
@@ -42,7 +60,7 @@ def interpretar_fecha(texto: str, hoy: date | None = None) -> str | None:
     y el agente pregunta en vez de adivinar: reservar en la fecha equivocada es
     peor que pedir una aclaracion.
     """
-    hoy = hoy or _HOY_POR_DEFECTO
+    hoy = hoy or fecha_hoy()
     t = texto.lower().strip()
 
     m = re.search(r"(\d{4})-(\d{2})-(\d{2})", t)
@@ -63,9 +81,16 @@ def interpretar_fecha(texto: str, hoy: date | None = None) -> str | None:
         except ValueError:
             return None
 
-    m = re.search(r"\b(\d{1,2})\s+de\s+(\w+)", t)
+    m = re.search(r"\b(\d{1,2})\s+de\s+(\w+)(?:\s+(?:de|del)\s+(\d{4}))?", t)
     if m and m.group(2) in _MESES:
         dia, mes = int(m.group(1)), _MESES[m.group(2)]
+        if m.group(3):
+            # Un anio escrito se respeta: ignorarlo convertiria "1 de enero de 2020"
+            # en una reserva para el proximo enero.
+            try:
+                return date(int(m.group(3)), mes, dia).isoformat()
+            except ValueError:
+                return None
         anio = hoy.year
         candidata = None
         try:
@@ -136,9 +161,11 @@ def consultar_disponibilidad(
 ) -> dict[str, Any]:
     """Embarcaciones libres en una fecha que cubran al grupo."""
     try:
-        datetime.strptime(fecha, "%Y-%m-%d")
+        solicitada = datetime.strptime(fecha, "%Y-%m-%d").date()
     except ValueError:
         return {"ok": False, "error": f"Fecha invalida: '{fecha}'. Se espera YYYY-MM-DD."}
+    if solicitada < fecha_hoy():
+        return {"ok": False, "error": f"La fecha {fecha} ya paso. Indica una fecha futura."}
     if pasajeros < 1:
         return {"ok": False, "error": "El numero de pasajeros debe ser al menos 1."}
 
@@ -208,6 +235,12 @@ def consultar_disponibilidad(
 
 def cotizar(embarcacion_id: str, fecha: str, ruta: str, pasajeros: int) -> dict[str, Any]:
     """Cotizacion detallada de una embarcacion concreta."""
+    try:
+        solicitada = datetime.strptime(fecha, "%Y-%m-%d").date()
+    except ValueError:
+        return {"ok": False, "error": f"Fecha invalida: '{fecha}'. Se espera YYYY-MM-DD."}
+    if solicitada < fecha_hoy():
+        return {"ok": False, "error": f"La fecha {fecha} ya paso. Indica una fecha futura."}
     emb = next((e for e in estructurado.listar_embarcaciones() if e["id"] == embarcacion_id), None)
     if not emb:
         return {"ok": False, "error": f"Embarcacion '{embarcacion_id}' no existe."}
@@ -289,9 +322,7 @@ def bloquear_reserva(
     if not cotizacion.get("ok"):
         return cotizacion
 
-    codigo = estructurado.siguiente_codigo_reserva()
-    ok, resultado = estructurado.crear_reserva(
-        codigo=codigo,
+    ok, resultado, reutilizada = estructurado.crear_reserva(
         embarcacion_id=embarcacion_id,
         fecha=fecha,
         ruta=ruta,
@@ -299,11 +330,19 @@ def bloquear_reserva(
         cliente=cliente,
         valor_total=cotizacion["valor_alquiler"],
         clave_idempotencia=clave_idempotencia,
+        limite_sesion=config.MAX_RESERVAS_POR_SESION,
+        limite_total=config.MAX_RESERVAS_BLOQUEADAS,
     )
     if not ok:
+        if resultado == "limite_sesion":
+            return {"ok": False, "motivo": "limite_sesion",
+                    "error": (f"Esta conversacion ya tiene {config.MAX_RESERVAS_POR_SESION} "
+                              "reservas bloqueadas, que es el maximo del demo.")}
+        if resultado == "limite_total":
+            return {"ok": False, "motivo": "limite_total",
+                    "error": "El demo alcanzo el maximo de reservas bloqueadas a la vez."}
         return {"ok": False, "error": f"No se pudo bloquear: {resultado}"}
 
-    reutilizada = resultado != codigo
     return {
         "ok": True,
         "codigo_reserva": resultado,

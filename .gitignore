@@ -19,3 +19,6 @@ data/modelos/
 data/logs/
 tmp/
 *.log
+
+# Almacen limpio de la imagen (se regenera con scripts/preparar_almacen.py)
+build/

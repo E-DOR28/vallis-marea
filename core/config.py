@@ -21,7 +21,8 @@ RAIZ_PROYECTO = RUTA_CORE.parent
 
 RUTA_DATA = RAIZ_PROYECTO / "data"
 RUTA_CORPUS = RUTA_DATA / "corpus"
-RUTA_ALMACEN = RUTA_DATA / "almacen"
+# VM_RUTA_ALMACEN permite construir un almacen limpio fuera de data/ (imagen del contenedor).
+RUTA_ALMACEN = Path(os.getenv("VM_RUTA_ALMACEN") or (RUTA_DATA / "almacen")).resolve()
 RUTA_MODELOS = RUTA_DATA / "modelos"
 RUTA_EVALUACION = RUTA_DATA / "evaluacion"
 RUTA_TRAZAS = RUTA_DATA / "trazas"
@@ -179,6 +180,38 @@ MOTIVO_ESCALAMIENTO = {
     "sin_fuente": "Se pidio informacion de politicas sin fuente recuperable.",
     "error_herramienta": "Una herramienta MCP fallo de forma irrecuperable.",
 }
+
+# --------------------------------------------------------------------------
+# Despliegue web (R3)
+# --------------------------------------------------------------------------
+def _entero(nombre: str, defecto: int) -> int:
+    try:
+        return int(os.getenv(nombre, str(defecto)))
+    except ValueError:
+        return defecto
+
+
+# Fecha de referencia del negocio. Vacio = fecha fija del demo (reproducible,
+# la que usan las evaluaciones); "hoy" = reloj real en hora de Colombia;
+# AAAA-MM-DD = esa fecha.
+FECHA_HOY = os.getenv("VM_FECHA_HOY", "").strip()
+
+# Una reserva "bloqueada" que no recibe anticipo se libera sola. 0 = no vence.
+# Las reservas "confirmadas" de la semilla nunca vencen.
+TTL_RESERVA_MINUTOS = _entero("VM_TTL_RESERVA_DEMO_MIN", 0)
+
+# Topes que protegen el inventario de un demo publico. 0 = sin tope.
+MAX_RESERVAS_POR_SESION = _entero("VM_MAX_RESERVAS_SESION", 0)
+MAX_RESERVAS_BLOQUEADAS = _entero("VM_MAX_RESERVAS_BLOQUEADAS", 0)
+
+# Reintentos ante fallos transitorios de Gemini (429, 5xx, red).
+LLM_REINTENTOS = _entero("VM_LLM_REINTENTOS", 2)
+LLM_ESPERA_BASE_SEGUNDOS = float(os.getenv("VM_LLM_ESPERA_BASE", "0.8"))
+LLM_TIMEOUT_SEGUNDOS = float(os.getenv("VM_LLM_TIMEOUT", "45"))
+
+# Aprendizaje continuo: indexar cada turno como memoria episodica. Se apaga en
+# el despliegue publico (un usuario no debe poder sembrar la memoria de otro).
+APRENDIZAJE_ACTIVO = os.getenv("VM_APRENDIZAJE", "1").strip() not in ("0", "false", "no")
 
 # --------------------------------------------------------------------------
 # Negocio (datos semilla del demo)
