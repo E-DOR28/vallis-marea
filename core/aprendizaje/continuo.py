@@ -170,7 +170,14 @@ def registrar_episodio(
     exito: bool = True,
     escalado: bool = False,
 ) -> dict[str, Any]:
-    """Indexa un turno resuelto como experiencia recuperable."""
+    """Indexa un turno resuelto como experiencia recuperable.
+
+    Con VM_APRENDIZAJE=0 no hace nada: en el despliegue publico la memoria
+    episodica no se escribe, para que lo que un visitante teclea no pueda
+    influir en las respuestas de otro.
+    """
+    if not config.APRENDIZAJE_ACTIVO:
+        return {"ok": True, "omitido": True}
     episodio = {
         "id": str(uuid.uuid4())[:12],
         "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),

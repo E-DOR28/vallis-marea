@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Vallis Marea · Asistente de reservas (demo académico)</title>
+  <meta name="description" content="Demo académico de agentes conversacionales: asistente de reservas de lanchas en Cartagena, con datos sintéticos.">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-logo" id="brand-logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false"></svg>
+        <div class="brand-text">
+          <h1>Vallis Marea</h1>
+          <p>Asistente de reservas · demo académico</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="status" id="status" role="status" data-estado="desconocido">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="status-text" id="status-text">Conectando…</span>
+        </span>
+        <button type="button" class="btn btn-ghost" id="menu-btn" aria-expanded="false" aria-controls="menu-panel">Menú</button>
+      </div>
+    </header>
+
+    <div class="notice notice-warn" id="degraded-notice" role="alert" hidden>
+      Modo degradado: las respuestas pueden ser limitadas mientras se recupera el servicio.
+    </div>
+
+    <section class="menu-panel" id="menu-panel" aria-label="Menú del demo" hidden>
+      <div class="menu-block">
+        <h2>Privacidad</h2>
+        <label class="check">
+          <input type="checkbox" id="consent-menu">
+          <span>Acepto que se guarde el texto de mis mensajes para mejorar el sistema</span>
+        </label>
+        <p class="hint">Las métricas técnicas anónimas siempre se registran. Puedes cambiar esta opción cuando quieras; aplica desde tu próximo mensaje.</p>
+      </div>
+      <div class="menu-block">
+        <h2>Agentes</h2>
+        <p class="hint" id="agents-hint">Cargando agentes…</p>
+        <ul class="agents" id="agents-list"></ul>
+      </div>
+      <div class="menu-block">
+        <button type="button" class="btn btn-secondary" id="new-chat-menu">Empezar una conversación nueva</button>
+      </div>
+    </section>
+
+    <main class="chat" id="chat-main">
+      <div class="log" id="log" role="log" aria-live="polite" aria-label="Conversación" tabindex="0"></div>
+      <button type="button" class="btn jump" id="jump-btn" hidden>Ir al último mensaje</button>
+    </main>
+
+    <section class="composer-wrap" aria-label="Escribir un mensaje">
+      <div class="typing" id="typing" hidden>
+        <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>Escribiendo…</span>
+      </div>
+
+      <div class="banner" id="banner" role="alert" hidden>
+        <p class="banner-text" id="banner-text"></p>
+        <div class="banner-actions">
+          <button type="button" class="btn btn-primary" id="banner-action" hidden></button>
+        </div>
+      </div>
+
+      <div class="examples" id="examples-box">
+        <button type="button" class="examples-toggle" id="examples-toggle" aria-expanded="true" aria-controls="examples">Ejemplos para probar</button>
+        <div class="examples-list" id="examples"></div>
+      </div>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <label class="sr-only" for="input">Tu mensaje</label>
+        <textarea id="input" rows="1" maxlength="1000" placeholder="Escribe tu mensaje…" enterkeyhint="send"></textarea>
+        <button type="submit" class="btn btn-primary send" id="send-btn">Enviar</button>
+      </form>
+      <div class="composer-meta">
+        <span id="counter" class="counter">0 / 1000</span>
+        <span id="turns" class="turns">Turnos restantes: —</span>
+      </div>
+      <footer class="footnote">Demo académico con datos sintéticos · No ingreses datos personales</footer>
+    </section>
+  </div>
+
+  <div class="overlay" id="consent-overlay" hidden>
+    <div class="dialog" id="consent-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title" aria-describedby="consent-desc">
+      <h2 id="consent-title">Bienvenido a Vallis Marea</h2>
+      <div id="consent-desc" class="dialog-body">
+        <p>Esto es un <strong>demo académico</strong> de la Universidad EAFIT, curso SI7016 Procesamiento de Lenguaje Natural. Equipo: Elkin Ortiz, Dilan Monsalve y Juan Trujillo.</p>
+        <ul>
+          <li>Todos los datos son <strong>sintéticos</strong>. Las reservas son de prueba y se liberan solas.</li>
+          <li>Por favor, <strong>no escribas datos personales</strong> (nombres reales, teléfonos, correos, documentos).</li>
+          <li>Siempre se registran métricas técnicas anónimas (tiempos, agentes usados, errores).</li>
+          <li>El <strong>texto</strong> de tus mensajes solo se guarda si marcas la casilla de abajo.</li>
+        </ul>
+        <label class="check">
+          <input type="checkbox" id="consent-check">
+          <span>Acepto que se guarde el texto de mis mensajes para mejorar el sistema</span>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-primary" id="consent-accept">Entendido, empezar</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -20,7 +20,10 @@ import numpy as np
 
 from core import config
 from core.llm import gemini
-from core.router.entrenar import RUTA_MODELO
+
+# Se define aqui y no se importa de entrenar.py: ese modulo trae scikit-learn,
+# que la imagen del servicio no incluye (solo hace falta numpy para inferir).
+RUTA_MODELO = config.RUTA_MODELOS / "router_intencion.npz"
 
 _MODELO: dict[str, Any] | None = None
 

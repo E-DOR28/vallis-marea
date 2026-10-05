@@ -14,9 +14,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import random
 import re
 import sqlite3
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any, Iterable
 
@@ -78,9 +80,42 @@ def cliente():
         return None
     if _CLIENTE is None:
         from google import genai
+        from google.genai import types
 
-        _CLIENTE = genai.Client(api_key=config.GOOGLE_API_KEY)
+        _CLIENTE = genai.Client(
+            api_key=config.GOOGLE_API_KEY,
+            http_options=types.HttpOptions(timeout=int(config.LLM_TIMEOUT_SEGUNDOS * 1000)),
+        )
     return _CLIENTE
+
+
+def _es_transitorio(exc: Exception) -> bool:
+    """True si reintentar tiene sentido: sobrecarga, limite de tasa, red."""
+    codigo = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    if isinstance(codigo, int) and (codigo == 429 or codigo >= 500):
+        return True
+    nombre = exc.__class__.__name__.lower()
+    if any(p in nombre for p in ("timeout", "connect", "readerror", "remoteprotocol")):
+        return True
+    texto = str(exc).upper()
+    return any(p in texto for p in
+               ("UNAVAILABLE", "RESOURCE_EXHAUSTED", "DEADLINE_EXCEEDED", "OVERLOADED"))
+
+
+def _con_reintentos(llamar):
+    """Ejecuta `llamar()` y reintenta con espera exponencial los fallos transitorios.
+
+    Con 5 personas probando a la vez, un 429 puntual es esperable; sin reintento
+    cada uno se veria como una escalada a humano que no era necesaria.
+    """
+    intentos = 1 + max(config.LLM_REINTENTOS, 0)
+    for n in range(intentos):
+        try:
+            return llamar()
+        except Exception as exc:
+            if n == intentos - 1 or not _es_transitorio(exc):
+                raise
+            time.sleep(config.LLM_ESPERA_BASE_SEGUNDOS * (2 ** n) + random.uniform(0, 0.3))
 
 
 def modo_degradado() -> bool:
@@ -123,14 +158,14 @@ def _embed_gemini(textos: list[str], tarea: str) -> list[np.ndarray]:
     TAM_LOTE = 32
     for i in range(0, len(textos), TAM_LOTE):
         lote = textos[i : i + TAM_LOTE]
-        resp = cli.models.embed_content(
+        resp = _con_reintentos(lambda lote=lote: cli.models.embed_content(
             model=config.MODELO_EMBEDDING,
             contents=lote,
             config=types.EmbedContentConfig(
                 task_type=tarea,
                 output_dimensionality=config.DIM_EMBEDDING,
             ),
-        )
+        ))
         for emb in resp.embeddings:
             v = np.asarray(emb.values, dtype=np.float32)
             # gemini-embedding-001 requiere renormalizar si se trunca la dimension.
@@ -248,11 +283,11 @@ def generar(
         cfg["response_json_schema"] = esquema_json
 
     try:
-        resp = cliente().models.generate_content(
+        resp = _con_reintentos(lambda: cliente().models.generate_content(
             model=modelo,
             contents=prompt,
             config=types.GenerateContentConfig(**cfg),
-        )
+        ))
         texto = (resp.text or "").strip()
         uso = getattr(resp, "usage_metadata", None)
         salida = RespuestaLLM(
