@@ -1,0 +1,142 @@
+{
+  "congelado_en": "2026-10-04 19:13:52",
+  "commit_padre": "40aa3348dab9e82bf4aadaba3602f4604dc1aa23",
+  "dataset": {
+    "ruta": "data/aprendizaje/dataset_router.json",
+    "sha256": "4860684639f4d452cf371591fd921ea9bf0ce231ea572fbd87572d32207eb2b4",
+    "n": 183,
+    "conteo_por_clase": {
+      "disponibilidad": 18,
+      "faq": 18,
+      "otro": 42,
+      "politica": 18,
+      "precio": 18,
+      "recomendacion": 15,
+      "reserva": 17,
+      "ruta_turistica": 16,
+      "saludo": 21
+    },
+    "origen": {
+      "dominio_sintetico": 141,
+      "massive_es": 42
+    }
+  },
+  "casi_duplicados": {
+    "umbral_similitud_caracteres": 0.85,
+    "umbral_jaccard_palabras": 0.8,
+    "resultado": {
+      "n_ejemplos": 183,
+      "n_grupos": 183,
+      "n_grupos_con_casi_duplicados": 0,
+      "n_ejemplos_en_grupos_multiples": 0,
+      "tamano_maximo_grupo": 1,
+      "ejemplos_de_grupos": []
+    },
+    "nota": "Los umbrales se fijaron antes de medir. Con ellos no hay casi-duplicados: las particiones por grupo equivalen a las estratificadas y la prueba anti-fuga se conserva como guarda."
+  },
+  "validacion_cruzada": {
+    "particiones": 5,
+    "semillas": [
+      7,
+      11,
+      23
+    ],
+    "tipo": "StratifiedGroupKFold con shuffle",
+    "sha256_particiones": "024d024678de98fbde9cef040c90c0c387d6d6dc4afbce8f5e361add37c4cfc3",
+    "fugas_de_grupo": [],
+    "min_ejemplos_por_clase_en_prueba": 3
+  },
+  "split_fijo": {
+    "semilla": 7,
+    "n_entrenamiento": 137,
+    "n_prueba": 46,
+    "con_casi_duplicado_en_entrenamiento": 0
+  },
+  "validacion_interna": {
+    "fraccion": 0.2,
+    "semilla": "semilla * 100 + particion"
+  },
+  "bootstrap": {
+    "replicas": 5000,
+    "semilla": 2026,
+    "unidad": "grupo",
+    "estadistico": "F1 macro promediado sobre las 3 repeticiones"
+  },
+  "baselines": {
+    "B0": "regresion logistica (C=4, balanced) sobre embeddings de Gemini gemini-embedding-001, tarea CLASSIFICATION",
+    "B1": "TF-IDF {'analyzer': 'char_wb', 'ngram_range': (2, 5), 'sublinear_tf': True, 'strip_accents': 'unicode', 'lowercase': True} + regresion logistica (C=4, balanced)",
+    "B2": "gemini-2.5-flash-lite sin entrenamiento, prompt y esquema de predecir.py",
+    "B3": "embeddings congelados del encoder principal (promedio de tokens) + regresion logistica (C=4, balanced)"
+  },
+  "candidatos": {
+    "e5_small": {
+      "repo": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "prefijo": "query: ",
+      "licencia": "MIT",
+      "rol": "principal"
+    },
+    "minilm": {
+      "repo": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+      "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+      "prefijo": "",
+      "licencia": "Apache-2.0",
+      "rol": "contraste"
+    },
+    "xlmr": {
+      "repo": "FacebookAI/xlm-roberta-base",
+      "revision": "e73636d4f797dec63c3081bb6ed5c7b0bb3f2089",
+      "prefijo": "",
+      "licencia": "MIT",
+      "rol": "contraste"
+    }
+  },
+  "descartados": {
+    "dccuchile/bert-base-spanish-wwm-cased": "solo publica pytorch_model.bin (pickle); el protocolo exige safetensors"
+  },
+  "hiperparametros": {
+    "max_len": 64,
+    "lote": 16,
+    "epocas_max": 15,
+    "paciencia": 3,
+    "lrs_encoder": [
+      2e-05,
+      5e-05
+    ],
+    "lr_cabeza": 0.001,
+    "weight_decay": 0.01,
+    "warmup": 0.1,
+    "dropout": 0.1,
+    "clip_gradiente": 1.0,
+    "perdida": "entropia cruzada con pesos de clase balanceados",
+    "seleccion_epoca": "mayor F1 macro en validacion; ante empate, la epoca anterior",
+    "seleccion_lr": "mayor F1 macro en validacion; ante empate, el lr menor",
+    "dispositivo": "cpu"
+  },
+  "regla_de_adopcion": {
+    "candidato_principal": "e5_small",
+    "contrastes": "se reportan; no sustituyen al principal",
+    "condicion_1": "limite inferior del IC95 % (bootstrap por grupos) de F1macro(afinado) - F1macro(B0) >= -0.02",
+    "condicion_2": "latencia p50 local del afinado < latencia p50 de B0 (embedding de Gemini sin cache + regresion logistica)",
+    "condicion_3": "umbral calibrado sobre validacion (cobertura-exactitud) sin usar la prueba",
+    "umbral": {
+      "regla": "menor umbral con exactitud >= objetivo y cobertura >= minima en validacion",
+      "exactitud_objetivo": 0.95,
+      "cobertura_minima": 0.5,
+      "umbral_desplegado": "mediana de los umbrales por particion"
+    },
+    "lr_desplegado": "el lr elegido con mas frecuencia en la validacion de las particiones",
+    "si_no_cumple": "queda disponible como VM_ROUTER=afinado; el informe lo reporta igual"
+  },
+  "versiones": {
+    "torch": "2.14.1",
+    "transformers": "5.18.0",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.23.2",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "huggingface_hub": "1.33.0",
+    "python": "3.13.13",
+    "plataforma": "macOS-26.6.2-arm64-arm-64bit-Mach-O"
+  }
+}
