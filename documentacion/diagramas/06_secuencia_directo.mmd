@@ -1,0 +1,14 @@
+%% Figura 6. Camino directo (intenciones saludo y otro): el orquestador no delega
+%% Fuente: grafo.py nodo_directo, nodo_componer
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant O as Orquestador
+    participant G as Gemini API
+
+    C->>O: texto del mensaje
+    Note over O: el router decide saludo u otro (ver figura 8)
+    Note over O: nodo directo: 0 saltos A2A.<br/>DATOS = ok, sin_delegacion, intencion
+    O->>G: redacta la respuesta con las reglas del negocio
+    G-->>O: texto final
+    O-->>C: contrato de texto

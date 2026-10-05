@@ -1,0 +1,51 @@
+{
+  "descripcion": "Secuencia de saltos A2A que cada figura promete para un mensaje de ejemplo. verificar_trazas.py la compara con la traza real (_trazas.saltos_a2a).",
+  "casos": [
+    {
+      "id": "conocimiento",
+      "figura": "3",
+      "texto": "¿Cuánto me devuelven si cancelo con un día de anticipación?",
+      "saltos": ["conocimiento.buscar_conocimiento"]
+    },
+    {
+      "id": "disponibilidad_sin_fecha",
+      "figura": "4, variante A",
+      "texto": "Quiero reservar una lancha para 10 personas",
+      "saltos": []
+    },
+    {
+      "id": "disponibilidad_consulta",
+      "figura": "4, variante B",
+      "texto": "¿Hay lancha para 12 personas el 19 de septiembre para Baru?",
+      "saltos": ["disponibilidad.consultar_disponibilidad"]
+    },
+    {
+      "id": "disponibilidad_reserva",
+      "figura": "4, variante C",
+      "texto": "Confirmo la reserva de la VM-05 para Baru el 26 de septiembre, somos 8",
+      "saltos": ["disponibilidad.consultar_disponibilidad", "disponibilidad.bloquear_reserva"],
+      "acciones": ["reserva_bloqueada"],
+      "escribe_datos": true
+    },
+    {
+      "id": "recomendador",
+      "figura": "5",
+      "texto": "Somos 8 amigos y queremos algo con música para celebrar",
+      "saltos": ["recomendador.recomendar"]
+    },
+    {
+      "id": "directo",
+      "figura": "6",
+      "texto": "Hola, buenas tardes",
+      "saltos": []
+    },
+    {
+      "id": "escalamiento_por_rechazo",
+      "figura": "7, primer rombo",
+      "texto": "Hay lancha para 10 personas el 19 de septiembre para ir de pesca?",
+      "saltos": ["disponibilidad.consultar_disponibilidad"],
+      "escalar": true,
+      "motivo": "error_herramienta"
+    }
+  ]
+}

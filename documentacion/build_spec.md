@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Versión | 0.1, borrador para validación |
+| Versión | 0.4, borrador para validación (historial en la §11) |
 | Fecha | 2026-10-04 |
 | Estado | Sin implementar. Este documento es lo único que se ha creado; ningún otro archivo del proyecto fue modificado. |
 | Proyecto | `/Users/kin/Desktop/Proyecto NLP` (no es un repositorio git) |
@@ -89,13 +89,19 @@ Todo lo de esta sección se leyó directamente en el proyecto. Las referencias s
 | H20 | No hay carpeta de pruebas automáticas ni repositorio git. La única verificación de regresión es la suite de evaluación. | listado de `/Users/kin/Desktop/Proyecto NLP` |
 | H21 | `.gitignore` excluye `.env`, `__pycache__/`, `*.pyc`, `data/almacen/`, `data/trazas/`, `data/modelos/`, `.req_installed` | `.gitignore` |
 | H22 | `requirements.txt` usa solo cotas inferiores (`>=`) | `requirements.txt` |
+| H23 | **Verificado en R1.** La fecha "de hoy" que usa `interpretar_fecha` está fija en 2026-09-13 (`_HOY_POR_DEFECTO`). Hoy es 2026-10-04: "el sábado" o "mañana" se resuelven contra una fecha pasada. R3 debe hacerla configurable (por ejemplo `VM_FECHA_HOY`, con la fecha real por defecto en el servicio web y 2026-09-13 en la suite de evaluación). | `core/agentes/disponibilidad/logica.py:20` y `:45` |
+| H24 | **Verificado en R1.** Un rechazo de negocio (`ok: false`, por ejemplo 10 personas en la ruta de pesca, tope de 6) se trata como fallo de herramienta: el orquestador escala con motivo `error_herramienta` y no le explica el límite al cliente. | `core/orquestador/grafo.py` (`nodo_componer`), `core/a2a/cliente.py` (`salto.ok`) |
+| H25 | **Verificado en R1.** `AGENTES[...]["habilidades"]` (por ejemplo `consultar_politicas`) no coincide con los ids reales de las tarjetas y no lo lee nadie. Es configuración muerta. | `core/config.py:106-135` |
+| H26 | **Verificado en R1.** El método JSON-RPC que envía el cliente A2A es `SendMessage`. La librería descarga el Agent Card al conectar (`create_client` con URL), pero el orquestador no usa sus habilidades. | Captura de la petición real; `core/a2a/cliente.py` |
+| H27 | **Verificado en R1.** El Recomendador lee las embarcaciones ocupadas directamente de SQLite, sin pasar por Disponibilidad. El orquestador llama localmente a `interpretar_fecha`. El texto DATOS que recibe el LLM redactor se corta a 6 000 caracteres. | `core/agentes/recomendador/logica.py`, `core/orquestador/grafo.py` |
+| H28 | **Verificado en R1.** Cada turno de `grafo.responder` agrega un episodio a `data/aprendizaje/memoria_episodica.jsonl` (archivo versionado). Toda prueba que llame al grafo lo ensucia. | `core/aprendizaje/continuo.py:164-184` |
 
 ### 2.2 Entorno de desarrollo (esta máquina)
 
 - macOS arm64, Apple M5 Pro, 24 GB de RAM, unos 746 GB libres.
 - Python del sistema: 3.9.6, sin torch, transformers ni streamlit. Homebrew tiene `python3.13` y `python3.14`; los `.pyc` del proyecto son `cpython-313`. No hay entorno virtual del proyecto.
 - Docker CLI 29.3.1 con contexto Colima; el daemon está apagado.
-- Node v25.8.2 y Google Chrome instalados. No hay pandoc, LaTeX, mermaid-cli ni graphviz.
+- Node v25.8.2 y Google Chrome instalados. No hay pandoc, LaTeX ni graphviz. Desde R1, `mermaid-cli` está en `~/.cache/vm-mermaid` (fuera del repo) y `documentacion/diagramas/exportar.sh` lo usa con el Chrome local.
 
 ### 2.3 Datos y línea base
 
@@ -135,7 +141,8 @@ Fuentes: documentación oficial de cada proveedor.
 | Hugging Face, visibilidad | Un Space privado devuelve 404 a terceros. Un Space "protegido" (código privado, app pública) exige PRO. | Para usuarios externos el Space debe ser público (o protegido con PRO). |
 | Hugging Face, modelos | La cuenta gratuita incluye 100 GB de almacenamiento privado. | Un modelo privado es gratis. |
 | Azure Container Apps con Azure for Students | Azure for Students: sin tarjeta de crédito, 100 USD de crédito válidos 12 meses, solo para estudiantes universitarios de tiempo completo. Container Apps tiene una cuota gratuita permanente de 180 000 vCPU-s, 360 000 GiB-s y 2 millones de solicitudes al mes. | Misma cuota que Cloud Run y sin tarjeta. No se verificó que el correo institucional de EAFIT sea aceptado ni las restricciones de región de la suscripción. Si se agota el crédito, los servicios se deshabilitan. |
-| Google Cloud Run (facturación por solicitud) | Misma cuota mensual en us-central1: 180 000 vCPU-s, 360 000 GiB-s y 2 millones de solicitudes. Con 1 vCPU y 2 GiB equivale a unas 50 h de uso activo al mes. Escala a cero. El Free Tier exige una cuenta de facturación, y el alta pide tarjeta u otro medio de pago (retención de 0 a 1 USD). | Alcanza para 5 usuarios, pero necesita una tarjeta. Hay arranque en frío. |
+| Google Cloud Run (facturación por solicitud) | Misma cuota mensual en us-central1: 180 000 vCPU-s, 360 000 GiB-s, 2 millones de solicitudes y 1 GB de salida desde Norteamérica. Con 1 vCPU y 2 GiB equivale a unas 50 h de uso activo al mes. Escala a cero. La cuota se calcula por cuenta de facturación, no por proyecto. El Free Tier exige una cuenta de facturación, y el alta pide tarjeta u otro medio de pago (retención de 0 a 1 USD). | Alcanza para 5 usuarios, pero necesita una cuenta de facturación. Hay arranque en frío. **Elegido por el equipo (v0.4).** |
+| Google Cloud, servicios de apoyo | Free Trial: 300 USD de crédito por 90 días para clientes nuevos, con tarjeta. Al terminar, la cuenta se cierra y los recursos se detienen (30 días de gracia) salvo que se pase a cuenta de pago; el Free Tier sigue activo. Cloud Build: 2 500 min al mes (`e2-standard-2`). Artifact Registry: 0,5 GB. Secret Manager: 6 versiones activas y 10 000 accesos al mes. Los presupuestos y alertas de facturación avisan, **no cortan el gasto**. | El crédito de 300 USD **no paga la API de Gemini de AI Studio**. Una imagen con `torch` puede superar los 0,5 GB gratuitos de Artifact Registry; se mide el tamaño real en R3 y, si pasa, se evalúa ONNX o se borran las imágenes viejas. |
 | Render, plan gratuito | Servicio web gratis con 512 MB de RAM, 750 h al mes. Se apaga tras 15 min sin tráfico y tarda cerca de 1 min en volver. Disco efímero. No declara tarjeta para el plan gratuito. | 512 MB no alcanza para `torch`. Solo es viable con el router actual (embeddings de Gemini) o con un encoder ONNX cuantizado, y hay que medirlo. |
 | Modal, plan Starter | 30 USD de crédito gratis al mes, sin cuota mensual, escala a cero, CPU a 0,0000131 USD por núcleo-segundo y memoria a 0,00000222 USD por GiB-segundo. Con 1 núcleo y 2 GiB serían unas 470 h activas al mes. Retención de logs de 1 día. | Holgado para 5 usuarios. Exige adaptar el arranque al SDK de Modal. No se verificó si el alta pide tarjeta. |
 | Oracle Cloud, Always Free | VM Ampere A1 con 2 OCPU y 12 GB en total, 200 GB de disco, 10 TB de salida al mes. Oracle puede reclamar instancias inactivas y a veces falta capacidad. | Es la opción más holgada, pero exige administrar una VM. No se verificó si el alta pide tarjeta. |
@@ -167,13 +174,15 @@ R0 a R5, definidos en la §5.
 - Quien ejecuta todas las ramas es el agente de implementación. No hay fusiones concurrentes entre personas.
 - Coste objetivo: 0 USD. El equipo pidió alternativas gratuitas al Space Docker.
 - El servicio corre en un hosting **remoto**. No se usa ninguna máquina personal del equipo, ni siquiera con túnel.
+- El hosting es **Google Cloud** (Cloud Run). El equipo dice contar con "una key"; su tipo y el estado de facturación del proyecto siguen sin confirmar (Q2, Q6).
 
 ### 3.4 Decisiones asumidas por este documento, pendientes de confirmación
 
 | Decisión | Valor asumido | Alternativa |
 |---|---|---|
 | Nivel de la interfaz | **Nivel 2**: API FastAPI y página HTML/JS a medida, empaquetada en un solo contenedor Docker | Nivel 1: la app Streamlit actual (menos esfuerzo). Nivel 3: nivel 2 más `docker-compose` con agentes en contenedores separados. |
-| Hosting remoto para la prueba | **A confirmar por el equipo.** Primera opción: Azure Container Apps con Azure for Students (sin tarjeta). Segunda: Google Cloud Run (requiere tarjeta). Tercera, sin tarjeta pero con 512 MB: Render gratuito. El contenedor es el mismo en las tres. | Modal Starter. Oracle Always Free. Space Docker de Hugging Face con PRO (9 USD). Ver §2.5. |
+| Hosting remoto para la prueba | **Google Cloud Run** (decisión del equipo, v0.4), con la imagen construida en Cloud Build y los secretos en Secret Manager. Pendiente: tipo de clave, proyecto y cuenta de facturación (Q2, Q6). | Si el proyecto no tiene facturación: Azure Container Apps con Azure for Students, o Render gratuito (512 MB). El contenedor es el mismo. Ver §2.5. |
+| Llamadas a Gemini en el servicio desplegado | Se conserva la clave de AI Studio (`genai.Client(api_key=...)`, un único punto en `core/llm/gemini.py:82`) guardada en Secret Manager. | Modo Vertex AI (`vertexai=True`, credenciales de la cuenta de servicio de Cloud Run), que se factura contra el proyecto de Google Cloud. Cambia el origen de la cuota y exige verificar que los embeddings coincidan con los del índice. Solo si la clave resulta ser de AI Studio sin cuota suficiente. |
 | Aumento de datos con paráfrasis | Solo si el primer resultado no mejora en `faq` y `politica` | No usarlo |
 
 ---
@@ -331,6 +340,9 @@ Si no se cumple, el modelo queda disponible como alternativa y el informe report
 - Reservas de demo: se liberan automáticamente tras `VM_TTL_RESERVA_DEMO_MIN` cambiando su estado a `liberada` (**no se borran filas**, por H15). Al liberar, se anula `clave_idempotencia` (por H14). Máximo 2 reservas por sesión.
 - `siguiente_codigo_reserva` se hace seguro ante concurrencia (reintento ante colisión de clave primaria o secuencia monótona). Es un cambio en un módulo con invariantes (§4.5) y requiere sus pruebas.
 - Límite de concurrencia global (semáforo y cola corta); sobre ese límite, 503 con `Retry-After`.
+- La fecha de referencia de `interpretar_fecha` es configurable (H23): el servicio web usa la fecha real y la suite de evaluación conserva 2026-09-13 para que la línea base siga siendo comparable.
+- Reintentos con espera creciente ante errores del LLM, y un error del LLM deja de verse como abstención (H24 y §Q8).
+- Los tests y `scripts/humo.py` no escriben en `memoria_episodica.jsonl` (H28).
 
 **Frontend**
 - Chat adaptado a celular, con los 6 ejemplos de `app.py` como atajos.
@@ -341,7 +353,9 @@ Si no se cumple, el modelo queda disponible como alternativa y el informe report
 **Despliegue**
 - Un solo contenedor Docker, que se prueba primero en local. El modelo afinado se descarga del repositorio privado del Hub al arrancar (con respaldo a la regresión logística si no está disponible).
 - Variables de entorno o secretos del hosting: `GOOGLE_API_KEY`, `HF_TOKEN` (solo lectura, porque el modelo es privado), `ADMIN_TOKEN`.
-- Prueba con usuarios: el contenedor corre en un servicio remoto (ver §3.4). Ninguna parte depende de una máquina personal del equipo.
+- Prueba con usuarios: el contenedor corre en Google Cloud Run (ver §3.4). Ninguna parte depende de una máquina personal del equipo.
+- Google Cloud: la imagen se construye con Cloud Build (la máquina del equipo es `arm64` y Cloud Run exige `linux/amd64`; además el daemon de Docker local no está activo). Una región de Tier 1 con cuota gratuita (por ejemplo `us-central1`). Los tres secretos van en Secret Manager y se montan como variables de entorno del servicio, con una cuenta de servicio propia que solo puede leerlos. `--max-instances=1`, `--concurrency` acotada, `--min-instances=0`, `--no-cpu-throttling` solo si la medición lo exige (cambia a facturación por instancia, con otra cuota gratuita).
+- Control de gasto: alerta de presupuesto en la cuenta de facturación (avisa, no corta) más el tope diario de turnos de la aplicación, que es el límite efectivo. El servicio es público, así que cada turno cuesta una llamada a Gemini.
 - Parámetros comunes del servicio: 2 GiB de memoria, 1 vCPU, una réplica como máximo, concurrencia limitada y mínimo de réplicas en 0. Se mide el arranque en frío (descarga del modelo y carga del índice) y se documenta.
 - Si se elige Render gratuito: 512 MB es el techo. El router pasa a ONNX cuantizado, o se conserva el actual basado en embeddings de Gemini. No se instala `torch` en la imagen.
 - El encoder afinado agrega `torch` y `transformers` al contenedor. R2 mide la RAM en reposo y evalúa exportarlo a ONNX con cuantización si la capa gratuita elegida no alcanza.
@@ -496,10 +510,12 @@ Los LLM no son deterministas. Una pregunta de las 30 respondibles equivale a 0,0
 | ID | Riesgo o pregunta | Impacto |
 |---|---|---|
 | Q1 | ~~Fecha de entrega~~ | Resuelta: no condiciona el alcance (§3.3) |
-| Q2 | Nivel 2 confirmado. ¿Qué hosting se usa para la prueba? | Cambia R3 y el criterio de aceptación de despliegue (§3.4) |
+| Q2 | Hosting decidido: Google Cloud Run. Falta saber si el proyecto ya tiene cuenta de facturación activa (Free Trial o de pago) | Sin facturación, Cloud Run no se puede usar ni dentro de la cuota gratuita |
+| Q6 | ¿Qué es "la key"? Una clave de Gemini (AI Studio), una clave de API de Google Cloud, una cuenta de servicio o un acceso al proyecto | Define cómo se despliega y de dónde sale la cuota de Gemini (§3.4) |
 | Q3 | ~~Quién ejecuta~~ | Resuelta: el agente de implementación |
 | Q4 | La cuenta de Hugging Face existe. ¿El token de escritura está disponible para publicar el modelo privado? | Bloquea la publicación del modelo |
 | Q5 | ~~Participantes~~ | Resuelta: 5. El análisis es cualitativo |
+| Q8 | Decisión pendiente (H24): ¿un rechazo de negocio, como "máximo 6 pasajeros en pesca", se explica al cliente en vez de escalar? Cambia el comportamiento del orquestador y exige actualizar la figura 7 y el Anexo A.6 | Mejora la experiencia en la prueba con usuarios; no altera el contrato JSON |
 | R1 | El fine-tuning puede quedar empatado con la línea base (46 ejemplos de prueba) | Se reporta igual; no se fuerza la adopción |
 | R2 | La cuota gratuita de Gemini limita las pruebas de carga y la prueba con usuarios | Reducir concurrencia en pruebas; tope diario |
 | R3 | Los límites de hosting de la §2.5 cambian, o la RAM gratuita no alcanza para el encoder | Reconfirmar el día del despliegue; usar ONNX cuantizado o cambiar de proveedor (el contenedor es el mismo) |
@@ -517,3 +533,5 @@ Los LLM no son deterministas. Una pregunta de las 30 respondibles equivale a 0,0
 | 0.1 | 2026-10-04 | Primer borrador para validación |
 | 0.2 | 2026-10-04 | Se verificó el hosting (§2.5): el Space Docker de Hugging Face exige PRO. Se fijan modelo privado en el Hub, 5 participantes, ejecución por el agente y coste objetivo 0 USD. El hosting queda como propuesta a confirmar. |
 | 0.3 | 2026-10-04 | El equipo descarta la máquina personal y el túnel: el hosting debe ser remoto. Se agregan Azure Container Apps (Azure for Students), Modal y la RAM de Render, y se aclara que Cloud Run pide tarjeta. |
+| 0.5 | 2026-10-04 | R1 ejecutado: nueve diagramas Mermaid, Anexo A del informe, corrección de §2.2 y §6, validación de arranque de Agent Cards y `verificar_trazas.py` (25 verificaciones). Hallazgos H23 a H28 y pregunta Q8. |
+| 0.4 | 2026-10-04 | R0 cerrado (etiqueta `r0-linea-base`). El equipo elige Google Cloud. Se verifican Free Trial, Free Tier, Secret Manager y la exclusión de la API de AI Studio del crédito. Se agrega Q6 y la opción de modo Vertex AI. |

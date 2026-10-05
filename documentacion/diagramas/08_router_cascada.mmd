@@ -1,0 +1,27 @@
+%% Figura 8. Cascada del router de intención. Fuente: core/router/predecir.py, core/config.py
+flowchart TB
+    T["texto del cliente"] --> C1["1. Clasificador<br/>regresión logística sobre embeddings de Gemini"]
+    C1 --> Q1{"confianza mayor o igual a 0,45"}
+    Q1 -->|"sí"| R1["intención, método = clasificador"]
+    Q1 -->|"no, o no hay modelo"| C2["2. LLM rápido<br/>salida JSON con intención y confianza"]
+    C2 --> Q2{"respuesta válida"}
+    Q2 -->|"sí"| R2["intención, método = llm"]
+    Q2 -->|"no, sin red o modo degradado"| Q3{"hubo salida del clasificador"}
+    Q3 -->|"sí"| R3["intención, método = clasificador_baja_confianza"]
+    Q3 -->|"no"| C3["3. Reglas por palabras clave"]
+    C3 --> R4["intención, método = reglas"]
+
+    R1 --> MAP["INTENCIONES: agente destino"]
+    R2 --> MAP
+    R3 --> MAP
+    R4 --> MAP
+
+    MAP --> D1["disponibilidad, precio, reserva: agente Disponibilidad"]
+    MAP --> D2["politica, faq, ruta_turistica: agente Conocimiento"]
+    MAP --> D3["recomendacion: agente Recomendador"]
+    MAP --> D4["saludo, otro: sin delegación"]
+
+    classDef nodo fill:#fdf1dc,stroke:#b9770e,color:#3b2a08;
+    classDef salida fill:#eef7ee,stroke:#3d7a3d,color:#173317;
+    class C1,C2,C3 nodo;
+    class R1,R2,R3,R4 salida;

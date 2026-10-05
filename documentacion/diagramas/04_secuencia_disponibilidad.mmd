@@ -1,0 +1,41 @@
+%% Figura 4. Camino de Disponibilidad y Reservas (intenciones disponibilidad, precio, reserva)
+%% Fuente: grafo.py nodo_disponibilidad, agentes/disponibilidad/logica.py, almacen/estructurado.py
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant O as Orquestador
+    participant G as Gemini API
+    participant D as Agente de Disponibilidad
+    participant S as SQLite vallis.db
+
+    C->>O: texto del mensaje
+    Note over O: el router decide disponibilidad, precio o reserva (ver figura 8)
+    O->>G: extrae slots: fecha_texto, pasajeros, ruta, baño, embarcación, confirma_reserva
+    Note over O: la fecha se normaliza con el parser determinista<br/>llamada local a interpretar_fecha, sin A2A
+
+    alt Variante A: no hay fecha
+        Note over O,D: no se llama a ningún agente (0 saltos A2A)
+        O->>G: redacta una sola pregunta pidiendo la fecha
+        O-->>C: contrato de texto
+    else Variante B: consulta de disponibilidad o precio
+        O->>D: A2A consultar_disponibilidad<br/>fecha, pasajeros (mínimo 1), ruta, requiere_bano
+        D->>S: embarcaciones y reservas vivas de esa fecha
+        D-->>O: libres ordenadas de la más económica, con precio si hay ruta
+        O->>G: redacta el mensaje solo con el bloque DATOS
+        O-->>C: contrato de texto
+    else Variante C: consulta más reserva
+        O->>D: A2A consultar_disponibilidad
+        D-->>O: libres con precio
+        Note over O: se bloquea solo si intención = reserva, confirma_reserva,<br/>embarcacion_id, ruta y la consulta previa salió bien
+        O->>D: A2A bloquear_reserva<br/>embarcacion_id, fecha, ruta, pasajeros<br/>clave_idempotencia = context_id, embarcación y fecha
+        D->>S: busca una reserva previa con esa clave
+        alt ya existía
+            D-->>O: devuelve la reserva existente (reutilizada_por_idempotencia)
+        else es nueva
+            Note over D: cotiza: capacidad autorizada, tope de la ruta,<br/>embarcación libre y tarifa de la tabla
+            D->>S: crea la reserva en estado bloqueada
+            D-->>O: codigo_reserva, valor_alquiler, anticipo_requerido
+        end
+        O->>G: redacta el mensaje con el bloque DATOS
+        O-->>C: contrato de texto con acción reserva_bloqueada
+    end

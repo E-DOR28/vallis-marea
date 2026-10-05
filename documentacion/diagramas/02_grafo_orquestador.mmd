@@ -1,0 +1,26 @@
+%% Figura 2. Grafo del orquestador. Fuente: core/orquestador/grafo.py (construir_grafo) y core/config.py (INTENCIONES)
+flowchart LR
+    START((inicio)) --> ENR["enrutar<br/>router.predecir"]
+
+    ENR -->|"disponibilidad, precio, reserva"| DIS["disponibilidad<br/>extrae slots, 1 o 2 saltos A2A"]
+    ENR -->|"politica, faq, ruta_turistica"| CON["conocimiento<br/>1 salto A2A"]
+    ENR -->|"recomendacion"| REC["recomendador<br/>extrae slots, 1 salto A2A"]
+    ENR -->|"saludo, otro"| DIR["directo<br/>sin delegación"]
+
+    DIS --> COM["componer"]
+    CON --> COM
+    REC --> COM
+    DIR --> COM
+
+    COM -->|"salto fallido, abstención<br/>o error del LLM"| ESC["contrato de escalamiento<br/>escalar_a_humano = true"]
+    COM -->|"datos válidos"| OK["contrato de texto<br/>mensaje, citas, acciones"]
+
+    ESC --> FIN((fin))
+    OK --> FIN
+
+    classDef nodo fill:#fdf1dc,stroke:#b9770e,color:#3b2a08;
+    classDef salida fill:#eef7ee,stroke:#3d7a3d,color:#173317;
+    classDef alerta fill:#fbe9e7,stroke:#b03a2e,color:#3d0f0a;
+    class ENR,DIS,CON,REC,DIR,COM nodo;
+    class OK salida;
+    class ESC alerta;

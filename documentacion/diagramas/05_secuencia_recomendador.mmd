@@ -1,0 +1,21 @@
+%% Figura 5. Camino del Recomendador (intención recomendacion)
+%% Fuente: grafo.py nodo_recomendador, agentes/recomendador/logica.py
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant O as Orquestador
+    participant G as Gemini API
+    participant R as Agente Recomendador
+    participant S as SQLite vallis.db
+
+    C->>O: texto del mensaje
+    Note over O: el router decide recomendacion (ver figura 8)
+    O->>G: extrae slots: pasajeros y fecha del mensaje
+    O->>R: A2A SendMessage<br/>habilidad recomendar<br/>texto_cliente, pasajeros, fecha
+    R->>G: extrae el perfil: ocasión, precio, baño
+    R->>G: embedding de la consulta y de las rutas y embarcaciones (con caché en disco)
+    R->>S: lee rutas, flota y embarcaciones ocupadas en la fecha
+    Note over R: filtros duros primero: capacidad, ocupada, baño.<br/>Luego orden por afinidad y top 3. No confirma disponibilidad
+    R-->>O: perfil_detectado, rutas_recomendadas, embarcaciones_recomendadas
+    O->>G: redacta el mensaje solo con el bloque DATOS
+    O-->>C: contrato de texto

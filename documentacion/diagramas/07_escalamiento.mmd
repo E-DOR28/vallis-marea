@@ -1,0 +1,25 @@
+%% Figura 7. Caminos de escalamiento a un humano. Fuente: grafo.py nodo_componer, contrato.py
+flowchart TB
+    IN["componer recibe los datos del agente y la lista de saltos"] --> Q1{"algún salto A2A<br/>con ok = false"}
+
+    Q1 -->|"sí"| E1["escalamiento<br/>motivo: error_herramienta<br/>metadatos: saltos_fallidos"]
+    Q1 -->|"no"| Q2{"datos.abstencion<br/>es verdadero"}
+
+    Q2 -->|"sí"| E2["escalamiento<br/>motivo: baja_confianza<br/>mensaje fijo, sin llamar al LLM"]
+    Q2 -->|"no"| LLM["Gemini redacta el mensaje<br/>con el bloque DATOS"]
+
+    LLM --> Q3{"el LLM devolvió error"}
+    Q3 -->|"sí"| E3["escalamiento<br/>motivo: error_herramienta<br/>metadatos: error_llm"]
+    Q3 -->|"no"| TXT["contrato de texto<br/>citas y acciones"]
+
+    E1 --> VAL["validar contrato<br/>sellar ms_total"]
+    E2 --> VAL
+    E3 --> VAL
+    TXT --> VAL
+
+    classDef alerta fill:#fbe9e7,stroke:#b03a2e,color:#3d0f0a;
+    classDef ok fill:#eef7ee,stroke:#3d7a3d,color:#173317;
+    classDef nodo fill:#fdf1dc,stroke:#b9770e,color:#3b2a08;
+    class E1,E2,E3 alerta;
+    class TXT ok;
+    class IN,LLM,VAL nodo;

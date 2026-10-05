@@ -1,0 +1,35 @@
+%% Figura 3. Camino de Conocimiento (intenciones politica, faq, ruta_turistica)
+%% Fuente: grafo.py nodo_conocimiento, a2a/servidor.py EjecutorMCP, agentes/conocimiento/rag.py
+sequenceDiagram
+    autonumber
+    actor C as Cliente
+    participant O as Orquestador
+    participant G as Gemini API
+    participant K as Agente de Conocimiento
+    participant S as Chroma y SQLite FTS5
+
+    C->>O: texto del mensaje
+    O->>G: router: embedding del mensaje (clasificador)
+    opt confianza del clasificador menor a 0,45
+        O->>G: router: LLM rápido decide la intención
+    end
+    Note over O: intención en politica, faq o ruta_turistica
+    O->>K: A2A SendMessage<br/>habilidad buscar_conocimiento<br/>pregunta + últimos 6 turnos
+    K->>G: embedding de la consulta
+    K->>S: top 8 por similitud + top 8 por BM25
+    Note over K: fusión RRF (k = 60), se conservan 4 fragmentos
+    alt mejor similitud menor a 0,45 y mejor BM25 menor a 1,0
+        K-->>O: abstencion = true, sin llamar al LLM
+    else hay evidencia
+        K->>G: fragmentos F1..F4 + pregunta, salida JSON estructurada
+        G-->>K: respuesta, abstencion, fragmentos_usados, confianza
+        Note over K: el código arma las citas con los índices declarados.<br/>Respuesta afirmativa sin citas se convierte en abstención
+        K-->>O: respuesta, citas, confianza, diagnóstico
+    end
+    alt abstención
+        O-->>C: contrato de escalamiento (baja_confianza)
+    else respuesta con citas
+        O->>G: redacta el mensaje solo con el bloque DATOS
+        G-->>O: texto final
+        O-->>C: contrato de texto con citas
+    end

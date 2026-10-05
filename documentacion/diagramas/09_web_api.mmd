@@ -1,0 +1,37 @@
+%% Figura 9. Página web y API. DISEÑO OBJETIVO de R3: aún no implementado. Fuente: build_spec.md §5 (R3) y §6.1
+flowchart LR
+    subgraph NAV["Navegador del participante"]
+        PAG["Página HTML y JS<br/>chat, citas, tarjeta de reserva,<br/>trazas, consentimiento, feedback"]
+    end
+
+    subgraph CR["Contenedor en Google Cloud Run"]
+        direction TB
+        API["API FastAPI<br/>sesiones, límites, request_id"]
+        subgraph NUC["Sistema existente sin cambios de contrato"]
+            ORQ["Orquestador"]
+            AG["3 agentes A2A en hilos o procesos"]
+        end
+        LOGS[("Registro de turnos<br/>sin texto salvo consentimiento")]
+    end
+
+    SM["Secret Manager<br/>GOOGLE_API_KEY, HF_TOKEN, ADMIN_TOKEN"]
+    HF["Hugging Face Hub<br/>modelo del router, privado"]
+    GEM(["Gemini API"])
+
+    PAG -->|"POST /api/turno"| API
+    PAG -->|"GET /api/salud"| API
+    PAG -->|"GET /api/agentes"| API
+    PAG -->|"POST /api/feedback"| API
+    API -->|"responder(texto, historial, context_id)"| ORQ
+    ORQ --> AG
+    API --> LOGS
+    API -.->|"GET /api/admin/logs con ADMIN_TOKEN"| LOGS
+    SM -.->|"variables de entorno"| API
+    HF -.->|"descarga al arrancar"| API
+    ORQ -.-> GEM
+    AG -.-> GEM
+
+    classDef ext fill:#f4f4f4,stroke:#777,color:#222;
+    classDef nodo fill:#e8f1fb,stroke:#2b5d9b,color:#10253f;
+    class SM,HF,GEM,PAG ext;
+    class API,ORQ,AG nodo;
