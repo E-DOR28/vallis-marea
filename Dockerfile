@@ -28,6 +28,10 @@ COPY --chown=vm:vm build/almacen ./data/almacen
 
 USER vm
 
+# Falla aqui, al construir, si algun archivo quedo fuera de la imagen (por ejemplo por un
+# patron de .gcloudignore), en vez de fallar al arrancar la revision.
+RUN python -c "import core.web.app, core.orquestador.grafo, core.router.predecir"
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD python -c "import os,urllib.request as u; u.urlopen('http://127.0.0.1:%s/api/salud' % os.environ.get('PORT','8080'), timeout=4)"
 
