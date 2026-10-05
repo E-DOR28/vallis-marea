@@ -5,10 +5,14 @@ embeddings **congelados** de Gemini. Los pesos del modelo de embeddings no se
 tocan.
 
 Eso NO es fine-tuning de un LLM, y el informe no debe llamarlo asi. Es
-`feature extraction` + clasificador lineal. Se eligio por la restriccion de
-tiempo del proyecto: afinar un transformer pequeno (XLM-R, DistilBERT
-multilingue) sobre este mismo dataset es el paso siguiente inmediato y esta
-documentado como trabajo futuro.
+`feature extraction` + clasificador lineal.
+
+El afinado real de un encoder multilingue pequeno (todos los pesos) se hizo en
+`core/router/afinar.py` con un protocolo pre-registrado (R2). No supero a este
+router: F1 macro 0,72 contra 0,86, aunque es unas 70 veces mas rapido (el router
+por embeddings incluye la llamada de red a Gemini; el afinado es solo CPU). Por eso
+este sigue siendo el router en produccion (`VM_ROUTER=embeddings`). Detalle en
+`documentacion/build_spec.md` (R2) y `data/evaluacion/metricas_router_afinado.json`.
 
 Por que hay un router entrenado y no se le pregunta al LLM en cada mensaje:
 un clasificador lineal sobre un embedding cuesta un orden de magnitud menos en

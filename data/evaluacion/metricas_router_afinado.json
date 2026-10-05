@@ -383,7 +383,22 @@
       "replicas": 5000
     }
   },
-  "latencia": null,
+  "latencia": {
+    "B0": {
+      "p50_ms": 344.6,
+      "p95_ms": 414.6,
+      "n": 40
+    },
+    "afinado": {
+      "p50_ms": 4.8,
+      "p95_ms": 7.4,
+      "n": 40
+    },
+    "modelo": "/Users/kin/Desktop/Proyecto NLP/data/modelos/router_afinado",
+    "maquina": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "hilos_torch": 6,
+    "nota": "Una sola maquina, un mensaje a la vez. La latencia de B0 incluye la red hacia Gemini; la del afinado es solo CPU local."
+  },
   "decision": {
     "v1": {
       "candidato": "e5_small",
@@ -395,14 +410,14 @@
         "requerido": ">= -0.02"
       },
       "condicion_2_latencia": {
-        "cumple": null,
-        "afinado_p50_ms": null,
-        "B0_p50_ms": null
+        "cumple": true,
+        "afinado_p50_ms": 4.8,
+        "B0_p50_ms": 344.6
       },
       "condicion_3_umbral_calibrado": {
         "cumple": true
       },
-      "adoptar": null,
+      "adoptar": false,
       "efecto": "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'"
     },
     "v2": {
@@ -415,14 +430,14 @@
         "requerido": ">= -0.02"
       },
       "condicion_2_latencia": {
-        "cumple": null,
-        "afinado_p50_ms": null,
-        "B0_p50_ms": null
+        "cumple": true,
+        "afinado_p50_ms": 4.8,
+        "B0_p50_ms": 344.6
       },
       "condicion_3_umbral_calibrado": {
         "cumple": true
       },
-      "adoptar": null,
+      "adoptar": false,
       "efecto": "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'"
     }
   },
