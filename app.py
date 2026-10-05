@@ -28,6 +28,7 @@ from core.a2a import lanzador
 from core.almacen import lexico, vectorial
 from core.llm import gemini
 from core.orquestador import grafo
+from core.orquestador.validacion import validar_agent_cards
 
 st.set_page_config(page_title="Vallis Marea - Agentes MCP/A2A", page_icon="⛵",
                    layout="wide")
@@ -99,6 +100,15 @@ def barra_lateral() -> None:
             if st.button("Levantar agentes", type="primary", use_container_width=True):
                 arrancar_agentes()
                 st.rerun()
+        else:
+            # estado_agentes acaba de refrescar las tarjetas: se reutilizan.
+            validacion = validar_agent_cards(usar_cache=True)
+            if not validacion["ok"]:
+                st.warning(
+                    "Estado degradado: el orquestador invoca habilidades que los "
+                    "Agent Cards no publican: "
+                    + ", ".join(validacion["faltantes"] or validacion["sin_respuesta"])
+                )
 
         st.divider()
         st.subheader("Indices")

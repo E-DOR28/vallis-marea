@@ -1,0 +1,82 @@
+%% Figura 1. Componentes y fronteras. Fuente: core/orquestador/grafo.py, core/a2a/*, core/agentes/*
+flowchart TB
+    CLI["Cliente<br/>Streamlit hoy, página web en R3"]
+
+    subgraph ORQ["Orquestador - proceso principal"]
+        direction TB
+        GRAFO["Grafo LangGraph<br/>enrutar, agente, componer"]
+        ROUTER["Router de intención<br/>clasificador, LLM, reglas"]
+        SLOTS["Extractor de datos<br/>LLM de slots + parser de fechas"]
+        A2AC["Cliente A2A<br/>loop persistente, tarjeta en caché"]
+    end
+
+    subgraph CON["Agente de Conocimiento - :8101"]
+        direction TB
+        CA2A["Servidor A2A + Agent Card"]
+        CEJ["EjecutorMCP"]
+        CMCP["Servidor MCP<br/>buscar_conocimiento<br/>obtener_fragmentos"]
+        CRAG["RAG híbrido<br/>RRF + citación por código"]
+    end
+
+    subgraph DIS["Agente de Disponibilidad y Reservas - :8102"]
+        direction TB
+        DA2A["Servidor A2A + Agent Card"]
+        DEJ["EjecutorMCP"]
+        DMCP["Servidor MCP<br/>consultar_disponibilidad, cotizar<br/>bloquear_reserva, interpretar_fecha<br/>listar_rutas"]
+        DLOG["Lógica de negocio<br/>capacidad, tarifas, idempotencia"]
+    end
+
+    subgraph REC["Agente Recomendador - :8103"]
+        direction TB
+        RA2A["Servidor A2A + Agent Card"]
+        REJ["EjecutorMCP"]
+        RMCP["Servidor MCP<br/>recomendar<br/>extraer_perfil"]
+        RLOG["Afinidad semántica<br/>filtros duros"]
+    end
+
+    CHROMA[("Chroma<br/>vectores")]
+    FTS[("SQLite FTS5<br/>BM25")]
+    SQL[("SQLite vallis.db<br/>flota, rutas, reservas")]
+    GEM(["Gemini API<br/>generación y embeddings"])
+    EXT["Clientes MCP externos<br/>Claude Desktop, IDE"]
+
+    CLI -->|"contrato JSON"| GRAFO
+    GRAFO --- ROUTER
+    GRAFO --- SLOTS
+    GRAFO --- A2AC
+
+    A2AC ==>|"A2A"| CA2A
+    A2AC ==>|"A2A"| DA2A
+    A2AC ==>|"A2A"| RA2A
+
+    CA2A --> CEJ
+    CEJ -->|"MCP en proceso"| CMCP
+    CMCP --> CRAG
+    DA2A --> DEJ
+    DEJ -->|"MCP en proceso"| DMCP
+    DMCP --> DLOG
+    RA2A --> REJ
+    REJ -->|"MCP en proceso"| RMCP
+    RMCP --> RLOG
+
+    CRAG --> CHROMA
+    CRAG --> FTS
+    DLOG --> SQL
+    RLOG --> SQL
+
+    SLOTS -.->|"llamada local, sin A2A:<br/>interpretar_fecha"| DLOG
+
+    ORQ -.->|"HTTPS"| GEM
+    CON -.->|"HTTPS"| GEM
+    REC -.->|"HTTPS"| GEM
+
+    EXT -.->|"MCP por stdio, los tres agentes.<br/>No lo usa el orquestador"| CMCP
+
+    classDef agente fill:#e8f1fb,stroke:#2b5d9b,color:#10253f;
+    classDef orq fill:#fdf1dc,stroke:#b9770e,color:#3b2a08;
+    classDef dato fill:#eef7ee,stroke:#3d7a3d,color:#173317;
+    classDef ext fill:#f4f4f4,stroke:#777,color:#222;
+    class CA2A,CEJ,CMCP,CRAG,DA2A,DEJ,DMCP,DLOG,RA2A,REJ,RMCP,RLOG agente;
+    class GRAFO,ROUTER,SLOTS,A2AC orq;
+    class CHROMA,FTS,SQL dato;
+    class CLI,GEM,EXT ext;

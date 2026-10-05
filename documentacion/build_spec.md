@@ -89,13 +89,19 @@ Todo lo de esta sección se leyó directamente en el proyecto. Las referencias s
 | H20 | No hay carpeta de pruebas automáticas ni repositorio git. La única verificación de regresión es la suite de evaluación. | listado de `/Users/kin/Desktop/Proyecto NLP` |
 | H21 | `.gitignore` excluye `.env`, `__pycache__/`, `*.pyc`, `data/almacen/`, `data/trazas/`, `data/modelos/`, `.req_installed` | `.gitignore` |
 | H22 | `requirements.txt` usa solo cotas inferiores (`>=`) | `requirements.txt` |
+| H23 | **Verificado en R1.** La fecha "de hoy" que usa `interpretar_fecha` está fija en 2026-09-13 (`_HOY_POR_DEFECTO`). Hoy es 2026-10-04: "el sábado" o "mañana" se resuelven contra una fecha pasada. R3 debe hacerla configurable (por ejemplo `VM_FECHA_HOY`, con la fecha real por defecto en el servicio web y 2026-09-13 en la suite de evaluación). | `core/agentes/disponibilidad/logica.py:20` y `:45` |
+| H24 | **Verificado en R1.** Un rechazo de negocio (`ok: false`, por ejemplo 10 personas en la ruta de pesca, tope de 6) se trata como fallo de herramienta: el orquestador escala con motivo `error_herramienta` y no le explica el límite al cliente. | `core/orquestador/grafo.py` (`nodo_componer`), `core/a2a/cliente.py` (`salto.ok`) |
+| H25 | **Verificado en R1.** `AGENTES[...]["habilidades"]` (por ejemplo `consultar_politicas`) no coincide con los ids reales de las tarjetas y no lo lee nadie. Es configuración muerta. | `core/config.py:106-135` |
+| H26 | **Verificado en R1.** El método JSON-RPC que envía el cliente A2A es `SendMessage`. La librería descarga el Agent Card al conectar (`create_client` con URL), pero el orquestador no usa sus habilidades. | Captura de la petición real; `core/a2a/cliente.py` |
+| H27 | **Verificado en R1.** El Recomendador lee las embarcaciones ocupadas directamente de SQLite, sin pasar por Disponibilidad. El orquestador llama localmente a `interpretar_fecha`. El texto DATOS que recibe el LLM redactor se corta a 6 000 caracteres. | `core/agentes/recomendador/logica.py`, `core/orquestador/grafo.py` |
+| H28 | **Verificado en R1.** Cada turno de `grafo.responder` agrega un episodio a `data/aprendizaje/memoria_episodica.jsonl` (archivo versionado). Toda prueba que llame al grafo lo ensucia. | `core/aprendizaje/continuo.py:164-184` |
 
 ### 2.2 Entorno de desarrollo (esta máquina)
 
 - macOS arm64, Apple M5 Pro, 24 GB de RAM, unos 746 GB libres.
 - Python del sistema: 3.9.6, sin torch, transformers ni streamlit. Homebrew tiene `python3.13` y `python3.14`; los `.pyc` del proyecto son `cpython-313`. No hay entorno virtual del proyecto.
 - Docker CLI 29.3.1 con contexto Colima; el daemon está apagado.
-- Node v25.8.2 y Google Chrome instalados. No hay pandoc, LaTeX, mermaid-cli ni graphviz.
+- Node v25.8.2 y Google Chrome instalados. No hay pandoc, LaTeX ni graphviz. Desde R1, `mermaid-cli` está en `~/.cache/vm-mermaid` (fuera del repo) y `documentacion/diagramas/exportar.sh` lo usa con el Chrome local.
 
 ### 2.3 Datos y línea base
 
@@ -334,6 +340,9 @@ Si no se cumple, el modelo queda disponible como alternativa y el informe report
 - Reservas de demo: se liberan automáticamente tras `VM_TTL_RESERVA_DEMO_MIN` cambiando su estado a `liberada` (**no se borran filas**, por H15). Al liberar, se anula `clave_idempotencia` (por H14). Máximo 2 reservas por sesión.
 - `siguiente_codigo_reserva` se hace seguro ante concurrencia (reintento ante colisión de clave primaria o secuencia monótona). Es un cambio en un módulo con invariantes (§4.5) y requiere sus pruebas.
 - Límite de concurrencia global (semáforo y cola corta); sobre ese límite, 503 con `Retry-After`.
+- La fecha de referencia de `interpretar_fecha` es configurable (H23): el servicio web usa la fecha real y la suite de evaluación conserva 2026-09-13 para que la línea base siga siendo comparable.
+- Reintentos con espera creciente ante errores del LLM, y un error del LLM deja de verse como abstención (H24 y §Q8).
+- Los tests y `scripts/humo.py` no escriben en `memoria_episodica.jsonl` (H28).
 
 **Frontend**
 - Chat adaptado a celular, con los 6 ejemplos de `app.py` como atajos.
@@ -506,6 +515,7 @@ Los LLM no son deterministas. Una pregunta de las 30 respondibles equivale a 0,0
 | Q3 | ~~Quién ejecuta~~ | Resuelta: el agente de implementación |
 | Q4 | La cuenta de Hugging Face existe. ¿El token de escritura está disponible para publicar el modelo privado? | Bloquea la publicación del modelo |
 | Q5 | ~~Participantes~~ | Resuelta: 5. El análisis es cualitativo |
+| Q8 | Decisión pendiente (H24): ¿un rechazo de negocio, como "máximo 6 pasajeros en pesca", se explica al cliente en vez de escalar? Cambia el comportamiento del orquestador y exige actualizar la figura 7 y el Anexo A.6 | Mejora la experiencia en la prueba con usuarios; no altera el contrato JSON |
 | R1 | El fine-tuning puede quedar empatado con la línea base (46 ejemplos de prueba) | Se reporta igual; no se fuerza la adopción |
 | R2 | La cuota gratuita de Gemini limita las pruebas de carga y la prueba con usuarios | Reducir concurrencia en pruebas; tope diario |
 | R3 | Los límites de hosting de la §2.5 cambian, o la RAM gratuita no alcanza para el encoder | Reconfirmar el día del despliegue; usar ONNX cuantizado o cambiar de proveedor (el contenedor es el mismo) |
@@ -523,4 +533,5 @@ Los LLM no son deterministas. Una pregunta de las 30 respondibles equivale a 0,0
 | 0.1 | 2026-10-04 | Primer borrador para validación |
 | 0.2 | 2026-10-04 | Se verificó el hosting (§2.5): el Space Docker de Hugging Face exige PRO. Se fijan modelo privado en el Hub, 5 participantes, ejecución por el agente y coste objetivo 0 USD. El hosting queda como propuesta a confirmar. |
 | 0.3 | 2026-10-04 | El equipo descarta la máquina personal y el túnel: el hosting debe ser remoto. Se agregan Azure Container Apps (Azure for Students), Modal y la RAM de Render, y se aclara que Cloud Run pide tarjeta. |
+| 0.5 | 2026-10-04 | R1 ejecutado: nueve diagramas Mermaid, Anexo A del informe, corrección de §2.2 y §6, validación de arranque de Agent Cards y `verificar_trazas.py` (25 verificaciones). Hallazgos H23 a H28 y pregunta Q8. |
 | 0.4 | 2026-10-04 | R0 cerrado (etiqueta `r0-linea-base`). El equipo elige Google Cloud. Se verifican Free Trial, Free Tier, Secret Manager y la exclusión de la API de AI Studio del crédito. Se agrega Q6 y la opción de modo Vertex AI. |

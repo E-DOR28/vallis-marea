@@ -56,6 +56,14 @@ externos y trazabilidad por salto.
     FAQs, rutas)     reservas)
 ```
 
+La figura 1 muestra las fronteras reales entre componentes: qué cruza A2A (HTTP), qué cruza MCP
+y qué es una llamada local. La figura 2 muestra el grafo del orquestador. El resto de las
+figuras está en el Anexo A.
+
+![Figura 1. Componentes y fronteras](diagramas/exportados/01_componentes.png)
+
+![Figura 2. Grafo del orquestador](diagramas/exportados/02_grafo_orquestador.png)
+
 ### 2.1 La decisión de diseño central
 
 El ejecutor A2A de cada agente **no reimplementa nada**: despacha sobre el mismo servidor MCP
@@ -70,9 +78,24 @@ desacoplamiento: la capacidad es una, los protocolos de acceso son dos.
 
 ### 2.2 El orquestador no sabe nada del negocio
 
-No conoce precios, ni políticas, ni la flota. Solo sabe **a quién preguntarle**, y lo averigua
-leyendo los Agent Cards, no por configuración cableada. Es la diferencia concreta contra el
-nodo monolítico que reemplaza.
+No conoce precios, ni políticas, ni la flota. Sabe **a quién preguntarle** porque la tabla
+`INTENCIONES` de `core/config.py` asigna cada intención a un agente, y sabe **qué habilidad
+pedirle** porque cuatro nombres están escritos en `core/orquestador/grafo.py`:
+`buscar_conocimiento`, `recomendar`, `consultar_disponibilidad` y `bloquear_reserva`.
+Es la diferencia concreta contra el nodo monolítico que reemplaza: la lógica de negocio vive
+en los agentes, no en el orquestador.
+
+Los Agent Cards **no se usan para elegir habilidades**. El cliente A2A los descarga al
+conectar, porque la librería los necesita para resolver el endpoint de cada agente, y la
+interfaz los lee para mostrar qué agentes están en línea. Para que los nombres escritos en el
+orquestador y los publicados en las tarjetas no se desincronicen sin aviso, al arrancar se
+valida que las cuatro habilidades estén publicadas (`core/orquestador/validacion.py`). Si
+falta alguna, el estado pasa a *degradado*.
+
+Hay una excepción al aislamiento: el orquestador importa y llama localmente el intérprete de
+fechas del agente de Disponibilidad (`interpretar_fecha`). Esa llamada no cruza A2A, aunque la
+misma función esté publicada como herramienta. El Anexo A.6 lista lo que **no** ocurre entre
+los componentes.
 
 ### 2.3 El contrato de salida no cambió
 
@@ -301,8 +324,11 @@ Esta es la pregunta que la propuesta se comprometió a responder con honestidad.
 
 - **Reutilización comprobable.** Los tres agentes son servidores MCP ejecutables de forma
   independiente. Cualquier cliente compatible puede usarlos sin conocer Vallis Marea.
-- **Descubrimiento en vez de cableado.** El orquestador lee las capacidades del Agent Card.
-  Agregar una habilidad no obliga a tocar el orquestador.
+- **Capacidades publicadas de forma abierta.** Cada agente publica en su Agent Card las
+  habilidades que ofrece, y un cliente A2A externo puede leerlas y usarlas sin conocer el
+  código. El orquestador propio, en cambio, tiene fijas las cuatro habilidades que invoca
+  (§2.2): publicar una habilidad nueva no cambia su comportamiento, y usarla sí exige
+  modificar `grafo.py`.
 - **Trazabilidad por salto.** Se sabe qué agente se invocó, con qué herramienta y en cuántos
   ms. En el monolito esa información simplemente no existe.
 - **Fronteras de falla.** Un salto A2A fallido se detecta y escala a un humano; en el nodo
@@ -356,3 +382,277 @@ C:\envs\vallis_marea\Scripts\python.exe -m core.ingesta.indexar --recrear
 C:\envs\vallis_marea\Scripts\python.exe -m core.router.entrenar
 C:\envs\vallis_marea\Scripts\streamlit.exe run app.py
 ```
+
+---
+
+## Anexo A. Contratos entre agentes
+
+Este anexo describe, con el código como fuente, qué le pide el orquestador a cada agente, qué
+recibe de vuelta y qué hace con la respuesta. Las figuras 3 a 8 se verifican contra la traza
+real de cada camino (`documentacion/diagramas/verificar_trazas.py`). La figura 9 es el diseño
+de la página web y todavía no está implementada.
+
+### A.1 Transporte
+
+Cada agente par es un servicio HTTP con tres rutas: el Agent Card en
+`/.well-known/agent-card.json`, el endpoint JSON-RPC en `/` y un `/salud`.
+
+**Petición (orquestador a agente).** Una llamada JSON-RPC `SendMessage` cuyo mensaje lleva una
+sola parte de texto. Ese texto es JSON con la forma
+`{"habilidad": "<nombre>", "parametros": {...}}`. El `context_id` del mensaje es el de la
+conversación que recibe `responder` (en Streamlit, el de la sesión).
+
+**Respuesta (agente a orquestador).** Un mensaje con rol de agente y una sola parte de texto
+que contiene el resultado de la herramienta en JSON. El cliente lo interpreta así: si el JSON
+trae `"ok": false`, el salto cuenta como fallido; si no trae el campo `ok`, cuenta como
+exitoso. Por eso la respuesta del agente de Conocimiento, que no incluye `ok`, solo cuenta como
+fallida si el transporte falla (excepción de red, respuesta vacía), nunca por su contenido.
+
+**Dentro del agente.** El ejecutor A2A (`EjecutorMCP`) no tiene lógica propia. Recibe la
+habilidad y llama `call_tool` sobre el servidor MCP del mismo agente, en el mismo proceso.
+Si el texto no es JSON o la habilidad no existe, responde `{"ok": false, "error": ...,
+"habilidades_disponibles": [...]}`. Si la herramienta lanza una excepción, responde
+`{"ok": false, "error": "<Clase>: <mensaje>", "habilidad": ...}`.
+
+**Agent Card.** Versión `1.0.0`, una interfaz JSON-RPC en la URL del agente, sin *streaming* ni
+notificaciones push, entradas `text/plain` y `application/json`, salida `application/json`.
+Cada herramienta MCP aparece como una habilidad cuyo `id` es el nombre de la herramienta.
+
+### A.2 Flujos por camino
+
+Cada camino termina en `componer`, que arma el contrato JSON de salida (figura 7). Antes de
+delegar, el router decide la intención (figura 8).
+
+![Figura 3. Camino de Conocimiento](diagramas/exportados/03_secuencia_conocimiento.png)
+
+![Figura 4. Camino de Disponibilidad y Reservas](diagramas/exportados/04_secuencia_disponibilidad.png)
+
+![Figura 5. Camino del Recomendador](diagramas/exportados/05_secuencia_recomendador.png)
+
+![Figura 6. Camino directo](diagramas/exportados/06_secuencia_directo.png)
+
+![Figura 7. Caminos de escalamiento a un humano](diagramas/exportados/07_escalamiento.png)
+
+![Figura 8. Cascada del router de intención](diagramas/exportados/08_router_cascada.png)
+
+![Figura 9. Página web y API (diseño, aún no implementado)](diagramas/exportados/09_web_api.png)
+
+Saltos A2A por camino, medidos en una corrida real del 4 de octubre de 2026 (los tiempos
+incluyen la llamada al LLM que hace el propio agente):
+
+| Camino | Saltos A2A | Tiempo de los saltos |
+|---|---|---|
+| Conocimiento | `conocimiento.buscar_conocimiento` | 3 229 ms |
+| Disponibilidad sin fecha | ninguno | no aplica |
+| Disponibilidad, consulta | `disponibilidad.consultar_disponibilidad` | 10,5 ms |
+| Disponibilidad, consulta y reserva | `consultar_disponibilidad` y `bloquear_reserva` | 7,1 ms y 5,3 ms |
+| Recomendador | `recomendador.recomendar` | 1 753 ms |
+| Directo | ninguno | no aplica |
+
+### A.3 Las nueve herramientas
+
+Los tipos y la obligatoriedad de cada parámetro son los del esquema JSON que publica el
+servidor MCP. `documentacion/diagramas/verificar_trazas.py` los compara con este anexo.
+
+#### A.3.1 `buscar_conocimiento` (agente de Conocimiento)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `pregunta` | string | sí | Pregunta del cliente en lenguaje natural. |
+| `historial` | string | no | Contexto de turnos previos. Por defecto, vacío. |
+
+**Respuesta.** `respuesta`, `abstencion` (bool), `citas` (lista de `fuente`, `titulo`,
+`seccion`, `version`, `fecha`), `confianza` (0 a 1), `motivo_abstencion`, `diagnostico`
+(candidatos, mejores puntajes, milisegundos, motivo de abstención, modelo y tokens),
+`fragmentos_recuperados` y `error`. No incluye `ok`.
+
+**Quién la invoca.** El orquestador, en el nodo `conocimiento`, con `pregunta` igual al texto
+del cliente e `historial` igual a los últimos 6 turnos.
+
+**Qué hace con el resultado.** Si `abstencion` es verdadero, escala a un humano con motivo
+`baja_confianza` y un mensaje fijo. Si no, el LLM redacta el mensaje a partir del bloque
+DATOS (el JSON de la respuesta, cortado a 6 000 caracteres) y las `citas` pasan al contrato
+sin cambios.
+
+#### A.3.2 `obtener_fragmentos` (agente de Conocimiento)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `consulta` | string | sí | Texto de búsqueda. |
+| `k` | integer | no | Cuántos fragmentos devolver. Por defecto, 4. |
+
+**Respuesta.** `ok`, `diagnostico` y `fragmentos` (cada uno con `chunk_id`, `texto`, `cita`,
+`puntaje_fusion`, `puntaje_denso` y `puntaje_lexico`).
+
+**Quién la invoca.** Nadie dentro del sistema. Es capacidad pública para clientes MCP y A2A
+externos.
+
+#### A.3.3 `interpretar_fecha` (agente de Disponibilidad)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `texto` | string | sí | Fecha tal como la escribió el cliente. |
+
+**Respuesta.** `ok` (falso si no logra interpretarla), `fecha` (`YYYY-MM-DD` o nulo) y
+`texto_original`.
+
+**Quién la invoca.** Nadie por A2A. El orquestador llama directamente la función equivalente
+de `core/agentes/disponibilidad/logica.py`, sin cruzar el protocolo.
+
+#### A.3.4 `consultar_disponibilidad` (agente de Disponibilidad)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `fecha` | string | sí | Fecha del paseo, `YYYY-MM-DD`. |
+| `pasajeros` | integer | sí | Número de personas del grupo. |
+| `ruta` | string | no | Código de ruta: `rosario`, `baru`, `cholon`, `tierrabomba`, `atardecer` o `pesca`. Por defecto, vacío. |
+| `requiere_bano` | boolean | no | Verdadero si el cliente exige baño a bordo. Por defecto, falso. |
+
+**Respuesta.** `ok`, `fecha`, `pasajeros`, `ruta`, `nombre_ruta`, `temporada`, `disponibles`
+(embarcaciones libres, ordenadas de la más económica; con `precio` si se indicó ruta),
+`total_disponibles` y `descartadas` (cada una con su motivo). Si falla: `{"ok": false,
+"error": ...}`.
+
+**Quién la invoca.** El orquestador, en el nodo `disponibilidad`, siempre que haya fecha.
+Envía `pasajeros` con mínimo 1 y la `ruta` y el baño que extrajo del mensaje.
+
+**Qué hace con el resultado.** Si `ok` es falso, el salto cuenta como fallido y escala con
+motivo `error_herramienta`. Si es verdadero, el resultado va al bloque DATOS y, si además se
+cumplen las condiciones de reserva (A.3.6), se encadena `bloquear_reserva`.
+
+#### A.3.5 `cotizar` (agente de Disponibilidad)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `embarcacion_id` | string | sí | Código de la embarcación, por ejemplo `VM-05`. |
+| `fecha` | string | sí | Fecha, `YYYY-MM-DD`. |
+| `ruta` | string | sí | Código de la ruta. |
+| `pasajeros` | integer | sí | Número de personas. |
+
+**Respuesta.** `ok`, `embarcacion`, `ruta`, `fecha`, `pasajeros`, `tarifa_base`, `temporada`,
+`descuento_aplicado`, `valor_alquiler`, `anticipo_50`, `moneda` y `nota`. Rechaza (con
+`ok` falso) si la embarcación o la ruta no existen, si el grupo excede la capacidad o el tope
+de la ruta, o si la embarcación ya está reservada.
+
+**Quién la invoca.** Nadie por A2A. `bloquear_reserva` la ejecuta internamente como paso
+previo a crear la reserva.
+
+#### A.3.6 `bloquear_reserva` (agente de Disponibilidad)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `embarcacion_id` | string | sí | Código de la embarcación. |
+| `fecha` | string | sí | Fecha, `YYYY-MM-DD`. |
+| `ruta` | string | sí | Código de la ruta. |
+| `pasajeros` | integer | sí | Número de personas. |
+| `cliente` | string | no | Nombre del cliente. Por defecto, vacío. |
+| `clave_idempotencia` | string | no | Identificador estable de la solicitud. Si falta, se deriva un hash de los demás campos. |
+
+**Respuesta.** `ok`, `codigo_reserva`, `estado`, `reutilizada_por_idempotencia`,
+`embarcacion`, `ruta`, `fecha`, `pasajeros`, `valor_alquiler`, `anticipo_requerido` y
+`siguiente_paso`. Si falla: `{"ok": false, "error": ...}`.
+
+**Quién la invoca.** El orquestador, justo después de `consultar_disponibilidad`, y solo si
+se cumplen las cinco condiciones: intención `reserva`, `confirma_reserva` verdadero,
+`embarcacion_id` presente, `ruta` presente y la consulta previa exitosa. Envía
+`clave_idempotencia` como `<context_id>|<embarcacion_id>|<fecha>`. No envía `cliente`.
+
+**Qué hace con el resultado.** Lo agrega al bloque DATOS como `reserva`. Si trae
+`codigo_reserva`, el contrato incluye la acción `reserva_bloqueada` con el código y el
+anticipo. Si `ok` es falso, el salto cuenta como fallido y escala.
+
+#### A.3.7 `listar_rutas` (agente de Disponibilidad)
+
+Sin parámetros.
+
+**Respuesta.** `ok` y `rutas` (cada una con `codigo`, `nombre`, `resumen`, `duracion`,
+`hora_zarpe`, `hora_regreso`, `tags`, `capacidad_minima_sugerida`, `capacidad_maxima_forzada` y
+`tipo_embarcacion_requerido`).
+
+**Quién la invoca.** Nadie dentro del sistema.
+
+#### A.3.8 `recomendar` (agente Recomendador)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `texto_cliente` | string | sí | Lo que el cliente dijo que busca. |
+| `pasajeros` | integer | no | Tamaño del grupo; 0 si no se sabe. Por defecto, 0. |
+| `fecha` | string | no | `YYYY-MM-DD`, para excluir embarcaciones ocupadas. Por defecto, vacío. |
+| `top_n` | integer | no | Cuántas opciones devolver. Por defecto, 3. |
+
+**Respuesta.** `ok`, `perfil_detectado`, `rutas_recomendadas` (con `afinidad`),
+`embarcaciones_recomendadas` (con `afinidad` y `por_que`), `embarcaciones_descartadas` y
+`nota`. No confirma disponibilidad.
+
+**Quién la invoca.** El orquestador, en el nodo `recomendador`, con el texto del cliente y los
+`pasajeros` y la `fecha` que extrajo. No envía `top_n`.
+
+**Qué hace con el resultado.** Lo pasa como bloque DATOS al LLM que redacta. No genera citas.
+
+#### A.3.9 `extraer_perfil` (agente Recomendador)
+
+| Parámetro | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `texto_cliente` | string | sí | Mensaje del cliente en lenguaje natural. |
+
+**Respuesta.** `ok` y `perfil` (`resumen_preferencias`, `pasajeros`, `ocasion`,
+`prioriza_precio`, `requiere_bano`).
+
+**Quién la invoca.** Nadie por A2A. `recomendar` la ejecuta internamente.
+
+### A.4 Quién invoca qué
+
+| Herramienta | Agente | ¿La invoca el orquestador? |
+|---|---|---|
+| `buscar_conocimiento` | Conocimiento | Sí |
+| `obtener_fragmentos` | Conocimiento | No |
+| `consultar_disponibilidad` | Disponibilidad | Sí |
+| `bloquear_reserva` | Disponibilidad | Sí |
+| `cotizar` | Disponibilidad | No |
+| `interpretar_fecha` | Disponibilidad | No (llamada local a la función) |
+| `listar_rutas` | Disponibilidad | No |
+| `recomendar` | Recomendador | Sí |
+| `extraer_perfil` | Recomendador | No |
+
+Cuatro de nueve herramientas las invoca el orquestador. Las otras cinco son capacidad pública:
+cualquier cliente MCP o A2A puede usarlas, pero ningún camino del sistema actual las necesita.
+
+### A.5 Validación de arranque
+
+`core/orquestador/validacion.py` lee el Agent Card de cada agente y comprueba que publique las
+cuatro habilidades de la tabla anterior. Si falta una habilidad o un agente no responde,
+registra un error y devuelve el estado `degradado`. La interfaz muestra una advertencia.
+
+### A.6 Lo que no ocurre
+
+- **Los agentes pares no se hablan entre sí.** Todo pasa por el orquestador. Las
+  dependencias entre agentes se resuelven por almacenamiento compartido: el Recomendador lee
+  las embarcaciones ocupadas directamente del mismo SQLite que usa Disponibilidad, sin pedirle
+  nada por A2A.
+- **El orquestador no elige habilidades leyendo las tarjetas.** Los cuatro nombres están
+  escritos en `grafo.py` (ver §2.2).
+- **La llamada MCP no sale del proceso.** En el camino del orquestador, A2A es la única
+  frontera de red. De A2A al servidor MCP se llama en el mismo proceso. MCP por `stdio` solo
+  existe si se arranca el servidor de forma independiente con
+  `python -m core.agentes.servidores_mcp <agente>`, y el orquestador no lo usa.
+- **Las fechas no cruzan el protocolo.** El orquestador usa localmente el intérprete de
+  fechas de Disponibilidad.
+- **Un rechazo de negocio se trata como fallo de herramienta.** Si `consultar_disponibilidad`
+  devuelve `ok: false` porque el grupo supera el tope de una ruta (por ejemplo, 10 personas en
+  pesca deportiva, con máximo 6), el salto cuenta como fallido. El orquestador escala a un
+  humano con motivo `error_herramienta` en lugar de explicarle el límite al cliente.
+- **Un error del LLM del agente de Conocimiento se ve como abstención.** Si la llamada al
+  modelo falla, el agente responde con abstención y el motivo "Error al consultar el modelo".
+  El orquestador lo escala como `baja_confianza`, sin distinguirlo de una pregunta que el corpus
+  no cubre.
+- **La extracción de datos se hace dos veces en el camino del Recomendador.** El orquestador
+  extrae `pasajeros` y `fecha` con un LLM, y `recomendar` vuelve a extraer el perfil del mismo
+  mensaje con otro.
+- **No hay autenticación, reintentos ni cancelación.** Los agentes escuchan en `127.0.0.1` sin
+  esquema de seguridad en el Agent Card. Un salto fallido no se reintenta. La cancelación de
+  tareas responde con un error.
+- **Los agentes no guardan memoria de conversación.** El historial lo aporta el orquestador y
+  solo `buscar_conocimiento` lo recibe.
+- **El texto que llega al LLM que redacta se corta sin aviso.** El bloque DATOS se trunca a
+  6 000 caracteres, y un resultado largo (por ejemplo, muchas embarcaciones descartadas) puede
+  perder campos al final.
