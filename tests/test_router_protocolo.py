@@ -168,3 +168,43 @@ class BootstrapTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ProtocoloCongeladoTest(unittest.TestCase):
+    """El codigo debe coincidir con lo que se congelo antes de entrenar."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from core.router import afinar
+        cls.A = afinar
+        cls.v1 = json.loads(afinar.RUTA_PROTOCOLO.read_text(encoding="utf-8"))
+        cls.v2 = json.loads(afinar.RUTA_PROTOCOLO_V2.read_text(encoding="utf-8"))
+
+    def test_hiperparametros_congelados_son_los_del_codigo(self) -> None:
+        self.assertEqual(self.v1["hiperparametros"], self.A.HIPER_V1)
+        self.assertEqual(self.v2["hiperparametros"], self.A.HIPER_V2)
+
+    def test_la_enmienda_solo_cambia_la_regla_de_parada(self) -> None:
+        distintas = {k for k in self.A.HIPER_V1 if self.A.HIPER_V1[k] != self.A.HIPER_V2[k]}
+        self.assertEqual(distintas, {"epocas_max", "paciencia"})
+
+    def test_el_dataset_no_cambio_desde_que_se_congelo(self) -> None:
+        sha = P.sha256_archivo(datos.RUTA_DATASET)
+        self.assertEqual(self.v1["dataset"]["sha256"], sha)
+        self.assertEqual(self.v2["dataset"]["sha256"], sha)
+
+    def test_las_particiones_son_las_mismas_en_ambas_versiones(self) -> None:
+        self.assertEqual(self.v1["validacion_cruzada"]["sha256_particiones"],
+                         self.v2["validacion_cruzada"]["sha256_particiones"])
+        textos, y = _dataset()
+        g = P.agrupar_casi_duplicados(textos)
+        self.assertEqual(self.A._hash_particiones(self.A._particiones(y, g)),
+                         self.v1["validacion_cruzada"]["sha256_particiones"])
+
+    def test_v2_referencia_el_protocolo_v1_sin_alterarlo(self) -> None:
+        self.assertEqual(self.v2["protocolo_base"]["sha256"],
+                         P.sha256_archivo(self.A.RUTA_PROTOCOLO))
+
+    def test_xlmr_no_esta_entre_los_candidatos_de_la_v2(self) -> None:
+        self.assertEqual(set(self.v2["candidatos"]), {"e5_small", "minilm"})
+        self.assertIn("FacebookAI/xlm-roberta-base", self.v2["descartados"])

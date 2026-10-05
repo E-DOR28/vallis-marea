@@ -43,6 +43,7 @@ from core.router import protocolo as P
 RAIZ = config.RUTA_DATA.parent
 DIR_R2 = config.RUTA_EVALUACION / "r2"
 RUTA_PROTOCOLO = DIR_R2 / "protocolo.json"
+RUTA_PROTOCOLO_V2 = DIR_R2 / "protocolo_v2.json"
 RUTA_METRICAS = config.RUTA_EVALUACION / "metricas_router_afinado.json"
 RUTA_ARTEFACTO = config.RUTA_MODELOS / "router_afinado"
 ARCHIVOS_DE_CODIGO = [
@@ -73,8 +74,36 @@ DESCARTADOS = {
     "dccuchile/bert-base-spanish-wwm-cased":
         "solo publica pytorch_model.bin (pickle); el protocolo exige safetensors",
 }
+DESCARTADOS_V2 = {
+    **DESCARTADOS,
+    "FacebookAI/xlm-roberta-base":
+        "descartado tras 2 de 16 particiones de la ronda 1: unas 5 veces mas lento por "
+        "particion y 1.1 GB de pesos, que no caben en el presupuesto gratuito de imagen "
+        "(Artifact Registry, 0.5 GB). Corrida parcial archivada en r2/descartados/.",
+}
+ENMIENDA_V2 = {
+    "fecha": "2026-10-04",
+    "momento": "posterior a ver las metricas de prueba de la ronda 1",
+    "motivo": "La ronda 1 dejo al encoder afinado por debajo del baseline B3 (el mismo "
+              "encoder congelado), lo que apunta a subentrenamiento. La confianza media "
+              "fue 0.285 con 9 clases.",
+    "evidencia": "r2/diagnostico_curva_validacion.json: curva de F1 de validacion de una "
+                 "sola particion (r0p0), sin mirar ninguna prediccion de prueba. Con "
+                 "lr=5e-5 sube lento, cae en las epocas 7-9 y llega a 0.91 en las 13-15; "
+                 "la paciencia 3 corta en esa caida.",
+    "cambios": {"paciencia": "3 -> 8", "epocas_max": "15 -> 30"},
+    "no_cambia": "datos, particiones, semillas, rejilla de lr, lote, lr de la cabeza, "
+                 "pesos de clase, regla del umbral, baselines y regla de adopcion",
+    "estatus": "EXPLORATORIO. Como se eligio despues de ver resultados de prueba, la "
+               "ronda 2 no es confirmatoria aunque la validacion interna siga limpia.",
+    "regla_de_confirmacion": "La decision de adopcion de la ronda 1 queda como esta (no se "
+                             "adopta). Si el principal de la ronda 2 cumpliera la condicion 1, "
+                             "se confirma antes de adoptar en un conjunto sintetico NUEVO que "
+                             "nadie haya mirado, con la misma condicion y el mismo margen.",
+    "candidatos": ["e5_small", "minilm"],
+}
 
-HIPER: dict[str, Any] = {
+HIPER_V1: dict[str, Any] = {
     "max_len": 64, "lote": 16, "epocas_max": 15, "paciencia": 3,
     "lrs_encoder": [2e-5, 5e-5], "lr_cabeza": 1e-3, "weight_decay": 0.01,
     "warmup": 0.1, "dropout": 0.1, "clip_gradiente": 1.0,
@@ -83,6 +112,11 @@ HIPER: dict[str, Any] = {
     "seleccion_lr": "mayor F1 macro en validacion; ante empate, el lr menor",
     "dispositivo": "cpu",
 }
+# Enmienda 1 (ver `enmienda_v2`): solo cambia la regla de parada.
+HIPER_V2: dict[str, Any] = {**HIPER_V1, "epocas_max": 30, "paciencia": 8}
+HIPER: dict[str, Any] = dict(HIPER_V1)  # los hiperparametros vigentes, segun la version
+
+PRINCIPAL = "e5_small"
 
 REGLA_ADOPCION = {
     "candidato_principal": "e5_small",
@@ -106,6 +140,19 @@ REGLA_ADOPCION = {
 # ---------------------------------------------------------------------------
 # Utilidades
 # ---------------------------------------------------------------------------
+def fijar_version(version: int) -> None:
+    HIPER.clear()
+    HIPER.update(HIPER_V2 if version == 2 else HIPER_V1)
+
+
+def _ruta_protocolo(version: int) -> Path:
+    return RUTA_PROTOCOLO_V2 if version == 2 else RUTA_PROTOCOLO
+
+
+def _nombre_salida(nombre: str, version: int) -> str:
+    return nombre if version == 1 else f"{nombre}_v2"
+
+
 def _git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=RAIZ, capture_output=True, text=True,
                           check=False).stdout.strip()
@@ -145,24 +192,27 @@ def _versiones() -> dict[str, str]:
         "python": platform.python_version(), "plataforma": platform.platform()}
 
 
-def _exigir_reproducibilidad() -> None:
+def _exigir_reproducibilidad(version: int = 1) -> None:
     """El protocolo debe estar commiteado y el codigo del router sin cambios."""
-    if _git("ls-files", "--error-unmatch", str(RUTA_PROTOCOLO.relative_to(RAIZ))) == "":
+    ruta = _ruta_protocolo(version)
+    rel = str(ruta.relative_to(RAIZ))
+    if _git("ls-files", "--error-unmatch", rel) == "":
         sys.exit("El protocolo no esta en git: ejecuta `congelar` y haz commit antes de entrenar.")
-    sucios = _git("status", "--porcelain", "--", str(RUTA_PROTOCOLO.relative_to(RAIZ)),
-                  *ARCHIVOS_DE_CODIGO)
+    sucios = _git("status", "--porcelain", "--", rel, *ARCHIVOS_DE_CODIGO)
     if sucios:
         sys.exit("Hay cambios sin commitear en el protocolo o en el codigo del router:\n" + sucios)
-    guardado = json.loads(RUTA_PROTOCOLO.read_text(encoding="utf-8"))
-    ruta_ds = datos.RUTA_DATASET
-    if P.sha256_archivo(ruta_ds) != guardado["dataset"]["sha256"]:
+    guardado = json.loads(ruta.read_text(encoding="utf-8"))
+    if P.sha256_archivo(datos.RUTA_DATASET) != guardado["dataset"]["sha256"]:
         sys.exit("El dataset cambio despues de congelar el protocolo.")
+    if guardado["hiperparametros"] != (HIPER_V2 if version == 2 else HIPER_V1):
+        sys.exit("Los hiperparametros del codigo no coinciden con los del protocolo congelado.")
 
 
 # ---------------------------------------------------------------------------
 # Congelar el protocolo
 # ---------------------------------------------------------------------------
-def congelar() -> dict[str, Any]:
+def congelar(version: int = 1) -> dict[str, Any]:
+    fijar_version(version)
     textos, y, grupos = _cargar_dataset()
     ejemplos = json.loads(datos.RUTA_DATASET.read_text(encoding="utf-8"))["ejemplos"]
     partes = _particiones(y, grupos)
@@ -176,6 +226,7 @@ def congelar() -> dict[str, Any]:
     fuga_fijo = P.filtracion_entre(grupos, tr, te)
 
     protocolo = {
+        "version": version,
         "congelado_en": time.strftime("%Y-%m-%d %H:%M:%S"),
         "commit_padre": commit_actual(),
         "dataset": {
@@ -217,16 +268,23 @@ def congelar() -> dict[str, Any]:
             "B3": "embeddings congelados del encoder principal (promedio de tokens) "
                   "+ regresion logistica (C=4, balanced)",
         },
-        "candidatos": CANDIDATOS,
-        "descartados": DESCARTADOS,
-        "hiperparametros": HIPER,
+        "candidatos": {k: CANDIDATOS[k] for k in (ENMIENDA_V2["candidatos"] if version == 2
+                                                   else CANDIDATOS)},
+        "descartados": DESCARTADOS_V2 if version == 2 else DESCARTADOS,
+        "hiperparametros": dict(HIPER),
         "regla_de_adopcion": REGLA_ADOPCION,
         "versiones": _versiones(),
     }
+    if version == 2:
+        protocolo["enmienda"] = ENMIENDA_V2
+        protocolo["protocolo_base"] = {
+            "archivo": str(RUTA_PROTOCOLO.relative_to(RAIZ)),
+            "sha256": P.sha256_archivo(RUTA_PROTOCOLO),
+        }
     DIR_R2.mkdir(parents=True, exist_ok=True)
-    RUTA_PROTOCOLO.write_text(json.dumps(protocolo, ensure_ascii=False, indent=2),
-                              encoding="utf-8")
-    print(f"Protocolo -> {RUTA_PROTOCOLO.relative_to(RAIZ)}")
+    destino = _ruta_protocolo(version)
+    destino.write_text(json.dumps(protocolo, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Protocolo v{version} -> {destino.relative_to(RAIZ)}")
     print(f"  fugas de grupo en particiones: {fuga or 'ninguna'}; "
           f"casi-duplicados: {protocolo['casi_duplicados']['resultado']['n_grupos_con_casi_duplicados']}")
     return protocolo
@@ -347,10 +405,12 @@ def _registro_afinado(cand: dict[str, str], tok: Any, textos: list[str], y: np.n
 
 
 def _guardar_oof(nombre: str, tipo: str, registros: list[dict[str, Any]],
-                 destino: Path, extra: dict[str, Any] | None = None) -> None:
+                 destino: Path, extra: dict[str, Any] | None = None,
+                 version: int = 1) -> None:
     destino.mkdir(parents=True, exist_ok=True)
     (destino / f"oof_{nombre}.json").write_text(json.dumps({
         "modelo": nombre, "tipo": tipo, "clases": CLASES, "commit": commit_actual(),
+        "version_protocolo": version,
         "arbol_limpio": not _git("status", "--porcelain", "--", *ARCHIVOS_DE_CODIGO),
         **(extra or {}), "particiones": registros,
     }, ensure_ascii=False), encoding="utf-8")
@@ -361,11 +421,13 @@ def _cargar_oof(nombre: str, destino: Path) -> list[dict[str, Any]]:
     return json.loads(ruta.read_text("utf-8"))["particiones"] if ruta.exists() else []
 
 
-def correr_cv(nombre: str, humo: bool = False) -> None:
+def correr_cv(nombre: str, humo: bool = False, version: int = 1) -> None:
     from transformers import AutoTokenizer
 
+    fijar_version(version)
     if not humo:
-        _exigir_reproducibilidad()
+        _exigir_reproducibilidad(version)
+    salida = _nombre_salida(nombre, version)
     cand = CANDIDATOS[nombre]
     textos, y, grupos = _cargar_dataset()
     partes = _particiones(y, grupos)
@@ -376,16 +438,16 @@ def correr_cv(nombre: str, humo: bool = False) -> None:
         partes = partes[:1]
 
     tok = AutoTokenizer.from_pretrained(cand["repo"], revision=cand["revision"])
-    hechos = {} if humo else {r["id"]: r for r in _cargar_oof(nombre, destino)}
+    hechos = {} if humo else {r["id"]: r for r in _cargar_oof(salida, destino)}
     for i, part in enumerate(partes, 1):
         if part["id"] in hechos:
-            print(f"[{nombre}] {part['id']} ya calculada, se omite")
+            print(f"[{salida}] {part['id']} ya calculada, se omite")
             continue
         reg = _registro_afinado(cand, tok, textos, y, grupos, part, lrs, epocas)
         hechos[part["id"]] = reg
-        _guardar_oof(nombre, "afinado", list(hechos.values()), destino,
-                     {"candidato": cand})
-        print(f"[{nombre}] {i}/{len(partes)} {part['id']} lr={reg['lr']} "
+        _guardar_oof(salida, "afinado", list(hechos.values()), destino,
+                     {"candidato": cand, "hiperparametros": dict(HIPER)}, version)
+        print(f"[{salida}] {i}/{len(partes)} {part['id']} lr={reg['lr']} "
               f"epoca={reg['epoca_mejor']} {reg['segundos']} s")
 
 
@@ -510,7 +572,9 @@ def analizar() -> dict[str, Any]:
     textos, y, grupos = _cargar_dataset()
     n = len(y)
     protocolo = json.loads(RUTA_PROTOCOLO.read_text("utf-8"))
-    nombres = ["B0", "B1", "B2", "B3"] + [c for c in CANDIDATOS if (DIR_R2 / f"oof_{c}.json").exists()]
+    afinados = [_nombre_salida(c, v) for v in (1, 2) for c in CANDIDATOS
+                if (DIR_R2 / f"oof_{_nombre_salida(c, v)}.json").exists()]
+    nombres = ["B0", "B1", "B2", "B3"] + afinados
     regs = {m: _cargar_oof(m, DIR_R2) for m in nombres}
     matrices = {m: _matriz(regs[m], n) for m in nombres}
     pred_b2 = matrices["B2"][0]
@@ -575,7 +639,10 @@ def analizar() -> dict[str, Any]:
     latencia = json.loads((DIR_R2 / "latencia.json").read_text("utf-8")) \
         if (DIR_R2 / "latencia.json").exists() else None
 
-    decision = _aplicar_regla(resultados, comparaciones, latencia)
+    decision = {
+        f"v{v}": _aplicar_regla(resultados, comparaciones, latencia, _nombre_salida(PRINCIPAL, v), v)
+        for v in (1, 2) if _nombre_salida(PRINCIPAL, v) in resultados
+    }
     metricas = {
         "protocolo": {"sha256_dataset": protocolo["dataset"]["sha256"],
                       "commit_padre_protocolo": protocolo["commit_padre"],
@@ -600,17 +667,17 @@ def analizar() -> dict[str, Any]:
     return metricas
 
 
-def _aplicar_regla(resultados: dict, comparaciones: dict, latencia: dict | None) -> dict[str, Any]:
-    p = REGLA_ADOPCION["candidato_principal"]
-    if p not in resultados:
-        return {"adoptar": None, "motivo": f"falta el candidato principal {p}"}
+def _aplicar_regla(resultados: dict, comparaciones: dict, latencia: dict | None,
+                   p: str, version: int) -> dict[str, Any]:
     c1 = comparaciones[f"{p}_menos_B0"]
     cond1 = c1["ic95_inferior"] >= -0.02
     cond2 = None if latencia is None else latencia["afinado"]["p50_ms"] < latencia["B0"]["p50_ms"]
     cond3 = resultados[p].get("umbral") is not None
     ok = [cond1, cond2, cond3]
     return {
-        "candidato": p,
+        "candidato": p, "version_protocolo": version,
+        "estatus": "pre-registrada" if version == 1 else
+                   "exploratoria (enmienda 1): requiere confirmacion en datos nuevos",
         "condicion_1_no_inferioridad": {"cumple": cond1, "ic95_inferior": c1["ic95_inferior"],
                                         "requerido": ">= -0.02"},
         "condicion_2_latencia": {"cumple": cond2,
@@ -618,21 +685,25 @@ def _aplicar_regla(resultados: dict, comparaciones: dict, latencia: dict | None)
                                  "B0_p50_ms": latencia and latencia["B0"]["p50_ms"]},
         "condicion_3_umbral_calibrado": {"cumple": cond3},
         "adoptar": None if None in ok else all(ok),
-        "efecto": "VM_ROUTER=afinado como predeterminado" if all(x is True for x in ok)
-                  else "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'",
+        "efecto": ("VM_ROUTER=afinado como predeterminado" if all(x is True for x in ok)
+                   and version == 1 else
+                   "pendiente de confirmacion en datos nuevos" if all(x is True for x in ok)
+                   else "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'"),
     }
 
 
 # ---------------------------------------------------------------------------
 # Modelo final
 # ---------------------------------------------------------------------------
-def entrenar_final(nombre: str, destino: Path = RUTA_ARTEFACTO) -> Path:
+def entrenar_final(nombre: str, version: int = 2, destino: Path = RUTA_ARTEFACTO) -> Path:
     from safetensors.torch import save_file
     from transformers import AutoTokenizer
 
-    _exigir_reproducibilidad()
+    fijar_version(version)
+    _exigir_reproducibilidad(version)
     cand = CANDIDATOS[nombre]
-    regs = [r for r in _cargar_oof(nombre, DIR_R2) if r["repeticion"] >= 0]
+    regs = [r for r in _cargar_oof(_nombre_salida(nombre, version), DIR_R2)
+            if r["repeticion"] >= 0]
     if len(regs) != P.PARTICIONES * len(P.SEMILLAS):
         sys.exit("Faltan particiones de CV: el umbral y el lr salen de ellas.")
     lrs = [r["lr"] for r in regs]
@@ -655,6 +726,7 @@ def entrenar_final(nombre: str, destino: Path = RUTA_ARTEFACTO) -> Path:
         "clases": CLASES, "modelo_base": cand["repo"], "revision_base": cand["revision"],
         "prefijo": cand["prefijo"], "max_len": HIPER["max_len"], "pooling": "promedio de tokens",
         "umbral_confianza": round(umbral, 4), "lr_encoder": lr,
+        "version_protocolo": version, "hiperparametros": dict(HIPER),
         "semilla": semilla, "epoca_mejor": info["epoca_mejor"], "f1_val": info["f1_val"],
         "n_entrenamiento": int(len(tr)), "n_validacion": int(len(va)),
         "sha256_dataset": P.sha256_archivo(datos.RUTA_DATASET), "commit": commit_actual(),
@@ -676,30 +748,33 @@ def entrenar_final(nombre: str, destino: Path = RUTA_ARTEFACTO) -> Path:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     sub = ap.add_subparsers(dest="orden", required=True)
-    sub.add_parser("congelar")
+    cg = sub.add_parser("congelar")
+    cg.add_argument("--version", type=int, choices=(1, 2), default=1)
     sub.add_parser("baselines")
     c = sub.add_parser("cv")
     c.add_argument("candidato", choices=sorted(CANDIDATOS))
     c.add_argument("--humo", action="store_true", help="1 particion, 2 epocas, sin escribir en r2/")
+    c.add_argument("--version", type=int, choices=(1, 2), default=1)
     la = sub.add_parser("latencia")
     la.add_argument("--modelo", default=str(RUTA_ARTEFACTO))
     sub.add_parser("analizar")
     f = sub.add_parser("final")
     f.add_argument("candidato", choices=sorted(CANDIDATOS))
+    f.add_argument("--version", type=int, choices=(1, 2), default=2)
     a = ap.parse_args()
 
     if a.orden == "congelar":
-        congelar()
+        congelar(a.version)
     elif a.orden == "baselines":
         correr_baselines()
     elif a.orden == "cv":
-        correr_cv(a.candidato, a.humo)
+        correr_cv(a.candidato, a.humo, a.version)
     elif a.orden == "latencia":
         medir_latencia(a.modelo)
     elif a.orden == "analizar":
         analizar()
     elif a.orden == "final":
-        entrenar_final(a.candidato)
+        entrenar_final(a.candidato, a.version)
 
 
 if __name__ == "__main__":
