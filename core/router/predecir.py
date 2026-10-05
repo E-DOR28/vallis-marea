@@ -23,6 +23,7 @@ from core.llm import gemini
 from core.router.entrenar import RUTA_MODELO
 
 _MODELO: dict[str, Any] | None = None
+_AFINADO_ERROR: str | None = None  # si el afinado no carga, no se reintenta en cada mensaje
 
 
 @dataclass
@@ -32,6 +33,8 @@ class Prediccion:
     metodo: str  # clasificador | llm | reglas
     ms: float = 0.0
     alternativas: list[tuple[str, float]] = None  # type: ignore[assignment]
+    # Umbral propio del modelo que decidio; None -> config.UMBRAL_CONFIANZA_ROUTER.
+    umbral: float | None = None
 
     def a_dict(self) -> dict[str, Any]:
         return {
@@ -50,7 +53,7 @@ def _cargar_modelo() -> dict[str, Any] | None:
         return _MODELO
     if not RUTA_MODELO.exists():
         return None
-    d = np.load(RUTA_MODELO, allow_pickle=True)
+    d = np.load(RUTA_MODELO, allow_pickle=False)
     _MODELO = {
         "coef": d["coef"],
         "intercept": d["intercept"],
@@ -67,7 +70,36 @@ def _softmax(z: np.ndarray) -> np.ndarray:
     return e / e.sum()
 
 
+def _por_afinado(texto: str) -> Prediccion | None:
+    """Nivel 1 con el encoder afinado (VM_ROUTER=afinado). None si no esta disponible."""
+    global _AFINADO_ERROR
+    if _AFINADO_ERROR is not None or not config.ROUTER_MODELO:
+        return None
+    try:
+        from core.router import afinado
+
+        m = afinado.modelo_actual(config.ROUTER_MODELO, config.HF_TOKEN)
+        probas = m.probas([texto])[0]
+    except Exception as exc:  # sin torch, sin red, revision invalida...
+        _AFINADO_ERROR = f"{exc.__class__.__name__}: {exc}"
+        print(f"[router] El modelo afinado no esta disponible ({_AFINADO_ERROR}); "
+              "se usa el clasificador sobre embeddings.")
+        return None
+    orden = np.argsort(-probas)
+    return Prediccion(
+        intencion=m.clases[orden[0]],
+        confianza=float(probas[orden[0]]),
+        metodo="clasificador",
+        alternativas=[(m.clases[i], float(probas[i])) for i in orden],
+        umbral=m.umbral,
+    )
+
+
 def _por_clasificador(texto: str) -> Prediccion | None:
+    if config.ROUTER_NIVEL1 == "afinado":
+        p = _por_afinado(texto)
+        if p is not None:
+            return p
     modelo = _cargar_modelo()
     if modelo is None:
         return None
@@ -162,7 +194,9 @@ def predecir(texto: str) -> Prediccion:
     t0 = time.perf_counter()
 
     p = _por_clasificador(texto)
-    if p is not None and p.confianza >= config.UMBRAL_CONFIANZA_ROUTER:
+    if p is not None and p.confianza >= (
+        p.umbral if p.umbral is not None else config.UMBRAL_CONFIANZA_ROUTER
+    ):
         p.ms = (time.perf_counter() - t0) * 1000
         return p
 

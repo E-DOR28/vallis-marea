@@ -188,3 +188,15 @@ CIUDAD = "Cartagena de Indias, Colombia"
 MONEDA = "COP"
 HORARIO_OPERACION = "07:00 a 17:00, todos los dias"
 PUNTO_EMBARQUE = "Muelle de La Bodeguita"
+
+# --------------------------------------------------------------------------
+# Router afinado (R2)
+# --------------------------------------------------------------------------
+# `embeddings` (predeterminado): regresion logistica sobre embeddings de Gemini.
+# `afinado`: encoder multilingue afinado, local. Solo reemplaza el nivel 1 de la
+# cascada; el LLM de desempate y las reglas siguen igual.
+ROUTER_NIVEL1 = os.getenv("VM_ROUTER", "embeddings")
+# Ruta local o `usuario/repo@<hash de 40 caracteres>` del Hub (revision obligatoria).
+ROUTER_MODELO = os.getenv("VM_ROUTER_MODELO", "")
+# Solo para descargar un modelo privado del Hub. Lectura es suficiente.
+HF_TOKEN = os.getenv("HF_TOKEN", "")
