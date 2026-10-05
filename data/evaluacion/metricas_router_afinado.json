@@ -1,0 +1,430 @@
+{
+  "protocolo": {
+    "sha256_dataset": "4860684639f4d452cf371591fd921ea9bf0ce231ea572fbd87572d32207eb2b4",
+    "commit_padre_protocolo": "40aa3348dab9e82bf4aadaba3602f4604dc1aa23",
+    "sha256_particiones": "024d024678de98fbde9cef040c90c0c387d6d6dc4afbce8f5e361add37c4cfc3"
+  },
+  "commits_de_resultados": {
+    "B0": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "B1": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "B2": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "B3": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "e5_small": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "minilm": "bad93337a7de1410e4b230c0ce56ee948f561fd1",
+    "e5_small_v2": "8cb12ef69e400bb3237db70b9680cca32865b906",
+    "minilm_v2": "8cb12ef69e400bb3237db70b9680cca32865b906"
+  },
+  "versiones": {
+    "torch": "2.14.1",
+    "transformers": "5.18.0",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.23.2",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.5.3",
+    "huggingface_hub": "1.33.0",
+    "python": "3.13.13",
+    "plataforma": "macOS-26.6.2-arm64-arm-64bit-Mach-O"
+  },
+  "n_ejemplos": 183,
+  "n_repeticiones": 3,
+  "particiones": 5,
+  "por_modelo": {
+    "B0": {
+      "f1_macro_media": 0.8631,
+      "f1_macro_por_repeticion": [
+        0.8695,
+        0.8554,
+        0.8644
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0071,
+      "exactitud_media": 0.8798,
+      "f1_por_clase": {
+        "disponibilidad": 0.9474,
+        "faq": 0.6064,
+        "otro": 0.9512,
+        "politica": 0.8394,
+        "precio": 0.8649,
+        "recomendacion": 0.869,
+        "reserva": 0.9905,
+        "ruta_turistica": 0.7444,
+        "saludo": 0.9545
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.8471,
+        "exactitud": 0.8696,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.3292,
+        "min": 0.192,
+        "max": 0.7045,
+        "particiones_que_cumplen": 12,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9095,
+        "resuelto_en_nivel_1": 0.6667
+      },
+      "cascada_umbral_produccion_0.45": {
+        "f1_macro": 0.931,
+        "resuelto_en_nivel_1": 0.5355
+      }
+    },
+    "B1": {
+      "f1_macro_media": 0.6605,
+      "f1_macro_por_repeticion": [
+        0.6612,
+        0.6913,
+        0.629
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0312,
+      "exactitud_media": 0.7013,
+      "f1_por_clase": {
+        "disponibilidad": 0.8865,
+        "faq": 0.3075,
+        "otro": 0.8647,
+        "politica": 0.6378,
+        "precio": 0.5503,
+        "recomendacion": 0.7442,
+        "reserva": 0.8038,
+        "ruta_turistica": 0.3322,
+        "saludo": 0.8174
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.6473,
+        "exactitud": 0.6522,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.6804,
+        "min": 0.2384,
+        "max": 0.7857,
+        "particiones_que_cumplen": 2,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9163,
+        "resuelto_en_nivel_1": 0.1384
+      }
+    },
+    "B2": {
+      "f1_macro_media": 0.9225,
+      "f1_macro_por_repeticion": [
+        0.9225,
+        0.9225,
+        0.9225
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0,
+      "exactitud_media": 0.9235,
+      "f1_por_clase": {
+        "disponibilidad": 1.0,
+        "faq": 0.8333,
+        "otro": 0.9367,
+        "politica": 0.8947,
+        "precio": 0.8824,
+        "recomendacion": 0.9375,
+        "reserva": 0.9714,
+        "ruta_turistica": 0.9333,
+        "saludo": 0.913
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.9568,
+        "exactitud": 0.9348,
+        "n_prueba": 46
+      }
+    },
+    "B3": {
+      "f1_macro_media": 0.7658,
+      "f1_macro_por_repeticion": [
+        0.7875,
+        0.8018,
+        0.7082
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0504,
+      "exactitud_media": 0.7942,
+      "f1_por_clase": {
+        "disponibilidad": 0.8735,
+        "faq": 0.357,
+        "otro": 0.8956,
+        "politica": 0.7242,
+        "precio": 0.6981,
+        "recomendacion": 0.87,
+        "reserva": 0.7706,
+        "ruta_turistica": 0.7641,
+        "saludo": 0.9394
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.7965,
+        "exactitud": 0.8261,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.4119,
+        "min": 0.1785,
+        "max": 0.4891,
+        "particiones_que_cumplen": 3,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9056,
+        "resuelto_en_nivel_1": 0.2058
+      }
+    },
+    "e5_small": {
+      "f1_macro_media": 0.6786,
+      "f1_macro_por_repeticion": [
+        0.6958,
+        0.7147,
+        0.6254
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.047,
+      "exactitud_media": 0.7049,
+      "f1_por_clase": {
+        "disponibilidad": 0.764,
+        "faq": 0.2937,
+        "otro": 0.7533,
+        "politica": 0.6817,
+        "precio": 0.7008,
+        "recomendacion": 0.7195,
+        "reserva": 0.7183,
+        "ruta_turistica": 0.6139,
+        "saludo": 0.8626
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.5858,
+        "exactitud": 0.6087,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.442,
+        "min": 0.1569,
+        "max": 0.8355,
+        "particiones_que_cumplen": 3,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.899,
+        "resuelto_en_nivel_1": 0.1658
+      },
+      "lr_elegidos": {
+        "2e-05": 3,
+        "5e-05": 12
+      },
+      "epoca_mejor_mediana": 8.0
+    },
+    "minilm": {
+      "f1_macro_media": 0.716,
+      "f1_macro_por_repeticion": [
+        0.6976,
+        0.7161,
+        0.7344
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0184,
+      "exactitud_media": 0.7486,
+      "f1_por_clase": {
+        "disponibilidad": 0.8523,
+        "faq": 0.2296,
+        "otro": 0.8576,
+        "politica": 0.6048,
+        "precio": 0.7805,
+        "recomendacion": 0.8533,
+        "reserva": 0.7163,
+        "ruta_turistica": 0.6249,
+        "saludo": 0.9249
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.5682,
+        "exactitud": 0.6087,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.9441,
+        "min": 0.2894,
+        "max": 0.9909,
+        "particiones_que_cumplen": 4,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9081,
+        "resuelto_en_nivel_1": 0.1967
+      },
+      "lr_elegidos": {
+        "2e-05": 2,
+        "5e-05": 13
+      },
+      "epoca_mejor_mediana": 7.5
+    },
+    "e5_small_v2": {
+      "f1_macro_media": 0.7191,
+      "f1_macro_por_repeticion": [
+        0.7289,
+        0.729,
+        0.6995
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.017,
+      "exactitud_media": 0.7395,
+      "f1_por_clase": {
+        "disponibilidad": 0.831,
+        "faq": 0.3326,
+        "otro": 0.8051,
+        "politica": 0.6784,
+        "precio": 0.6907,
+        "recomendacion": 0.7616,
+        "reserva": 0.8567,
+        "ruta_turistica": 0.617,
+        "saludo": 0.8992
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.7691,
+        "exactitud": 0.7826,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.8406,
+        "min": 0.2123,
+        "max": 0.9639,
+        "particiones_que_cumplen": 3,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9077,
+        "resuelto_en_nivel_1": 0.1712
+      },
+      "lr_elegidos": {
+        "2e-05": 7,
+        "5e-05": 8
+      },
+      "epoca_mejor_mediana": 15.0
+    },
+    "minilm_v2": {
+      "f1_macro_media": 0.7206,
+      "f1_macro_por_repeticion": [
+        0.6895,
+        0.7354,
+        0.7369
+      ],
+      "f1_macro_sd_entre_repeticiones": 0.0269,
+      "exactitud_media": 0.7541,
+      "f1_por_clase": {
+        "disponibilidad": 0.8252,
+        "faq": 0.2385,
+        "otro": 0.8724,
+        "politica": 0.6337,
+        "precio": 0.7811,
+        "recomendacion": 0.7915,
+        "reserva": 0.7591,
+        "ruta_turistica": 0.6368,
+        "saludo": 0.9471
+      },
+      "split_fijo_semilla7": {
+        "f1_macro": 0.7198,
+        "exactitud": 0.7609,
+        "n_prueba": 46
+      },
+      "umbral": {
+        "mediana": 0.9379,
+        "min": 0.2826,
+        "max": 0.9963,
+        "particiones_que_cumplen": 5,
+        "de": 15
+      },
+      "cascada_umbral_por_particion": {
+        "f1_macro": 0.9014,
+        "resuelto_en_nivel_1": 0.2805
+      },
+      "lr_elegidos": {
+        "2e-05": 7,
+        "5e-05": 8
+      },
+      "epoca_mejor_mediana": 11.0
+    }
+  },
+  "diferencias_frente_a_B0": {
+    "B1_menos_B0": {
+      "diferencia": -0.2026,
+      "ic95_inferior": -0.27,
+      "ic95_superior": -0.1407,
+      "replicas": 5000
+    },
+    "B2_menos_B0": {
+      "diferencia": 0.0594,
+      "ic95_inferior": 0.0179,
+      "ic95_superior": 0.1048,
+      "replicas": 5000
+    },
+    "B3_menos_B0": {
+      "diferencia": -0.0972,
+      "ic95_inferior": -0.1534,
+      "ic95_superior": -0.0451,
+      "replicas": 5000
+    },
+    "e5_small_menos_B0": {
+      "diferencia": -0.1845,
+      "ic95_inferior": -0.244,
+      "ic95_superior": -0.1305,
+      "replicas": 5000
+    },
+    "minilm_menos_B0": {
+      "diferencia": -0.1471,
+      "ic95_inferior": -0.2087,
+      "ic95_superior": -0.0869,
+      "replicas": 5000
+    },
+    "e5_small_v2_menos_B0": {
+      "diferencia": -0.1439,
+      "ic95_inferior": -0.2007,
+      "ic95_superior": -0.0913,
+      "replicas": 5000
+    },
+    "minilm_v2_menos_B0": {
+      "diferencia": -0.1425,
+      "ic95_inferior": -0.2006,
+      "ic95_superior": -0.0862,
+      "replicas": 5000
+    }
+  },
+  "latencia": null,
+  "decision": {
+    "v1": {
+      "candidato": "e5_small",
+      "version_protocolo": 1,
+      "estatus": "pre-registrada",
+      "condicion_1_no_inferioridad": {
+        "cumple": false,
+        "ic95_inferior": -0.244,
+        "requerido": ">= -0.02"
+      },
+      "condicion_2_latencia": {
+        "cumple": null,
+        "afinado_p50_ms": null,
+        "B0_p50_ms": null
+      },
+      "condicion_3_umbral_calibrado": {
+        "cumple": true
+      },
+      "adoptar": null,
+      "efecto": "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'"
+    },
+    "v2": {
+      "candidato": "e5_small_v2",
+      "version_protocolo": 2,
+      "estatus": "exploratoria (enmienda 1): requiere confirmacion en datos nuevos",
+      "condicion_1_no_inferioridad": {
+        "cumple": false,
+        "ic95_inferior": -0.2007,
+        "requerido": ">= -0.02"
+      },
+      "condicion_2_latencia": {
+        "cumple": null,
+        "afinado_p50_ms": null,
+        "B0_p50_ms": null
+      },
+      "condicion_3_umbral_calibrado": {
+        "cumple": true
+      },
+      "adoptar": null,
+      "efecto": "queda disponible como alternativa; el valor predeterminado sigue en 'embeddings'"
+    }
+  },
+  "nota_metodologica": "Fine-tuning de un encoder multilingue (todos los pesos) con cabeza lineal. No es fine-tuning de un LLM generativo. Datos en su mayoria sinteticos."
+}
